@@ -4,233 +4,274 @@ namespace UrlUtil;
 /**
  * Class UrlParser
  */
-class UrlParser {
+class UrlParser implements \ArrayAccess {
 
-/**
- * @var string
- */
-	protected $_url;
+    protected $components = array('scheme', 'user', 'pass', 'host', 'port', 'path', 'fragment', 'query');
 
-/**
- * @var string
- */
-	protected $_scheme;
+    /**
+     * @var string
+     */
+    protected $url;
 
-/**
- * @var string
- */
-	protected $_user;
+    /**
+     * @var string
+     */
+    protected $scheme;
 
-/**
- * @var string
- */
-	protected $_pass;
+    /**
+     * @var string
+     */
+    protected $user;
 
-/**
- * @var string
- */
-	protected $_host;
+    /**
+     * @var string
+     */
+    protected $pass;
 
-/**
- * @var int
- */
-	protected $_port;
+    /**
+     * @var string
+     */
+    protected $host;
 
-/**
- * @var string
- */
-	protected $_path;
+    /**
+     * @var int
+     */
+    protected $port;
 
-/**
- * @var string
- */
-	protected $_query;
+    /**
+     * @var string
+     */
+    protected $path;
 
-/**
- * @var array
- */
-	protected $_queryData = array();
+    /**
+     * @var string
+     */
+    protected $query;
 
-/**
- * @var string
- */
-	protected $_fragment;
+    /**
+     * @var array
+     */
+    protected $queryData = array();
 
-/**
- * @param string $url
- */
-	public function __construct($url = null) {
-		if ($url) {
-			$this->setUrl($url);
-		}
-	}
+    /**
+     * @var string
+     */
+    protected $fragment;
 
-/**
- * @param string $url
- * @return $this
- */
-	public function setUrl($url) {
-		$this->_url = $url;
-		$this->_parseUrl();
-		return $this;
-	}
+    /**
+     * @param string $url
+     */
+    public function __construct($url = null)
+    {
+        if ($url) {
+            $this->setUrl($url);
+        }
+    }
 
-/**
- * Component Setter
- *
- * @param string $key
- * @param mixed $val
- * @return void
- */
-	protected function _set($key, $val) {
-		$prop = '_' . $key;
-		$this->{$prop} = $val;
-	}
+    /**
+     * @param string $url
+     * @return $this
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+        $this->parseUrl();
+        return $this;
+    }
 
-/**
- * Parse Url components
- *
- * @return void
- */
-	protected function _parseUrl() {
-		$components = parse_url($this->_url);
+    /**
+     * Component Setter
+     *
+     * @param string $key
+     * @param mixed $val
+     * @return void
+     */
+    protected function set($key, $val)
+    {
+        $this->{$key} = $val;
+    }
 
-		foreach (array('scheme', 'user', 'pass', 'host', 'port', 'path', 'fragment', 'query') as $c) {
-			if (isset($components[$c])) {
-				$this->_set($c, $components[$c]);
-			} else {
-				$this->_set($c, '');
-			}
-		}
+    /**
+     * Parse Url components
+     *
+     * @return void
+     */
+    protected function parseUrl()
+    {
+        $components = parse_url($this->url);
 
-		if (isset($components['query'])) {
-			parse_str($components['query'], $this->_queryData);
-		}
-	}
+        foreach ($this->components as $c) {
+            if (isset($components[$c])) {
+                $this->set($c, $components[$c]);
+            } else {
+                $this->set($c, '');
+            }
+        }
 
-	public function getComponents() {
-		return array(
-			'scheme' => $this->_scheme,
-			'user' => $this->_user,
-			'pass' => $this->_pass,
-			'host' => $this->_host,
-			'port' => $this->_port,
-			'path' => $this->_path,
-			'fragment' => $this->_fragment,
-			'query' => $this->_query
-		);
-	}
+        if (isset($components['query'])) {
+            parse_str($components['query'], $this->queryData);
+        }
+    }
 
-	public function getScheme() {
-		return $this->_scheme;
-	}
+    public function getComponents()
+    {
+        return array(
+            'scheme' => $this->scheme,
+            'user' => $this->user,
+            'pass' => $this->pass,
+            'host' => $this->host,
+            'port' => $this->port,
+            'path' => $this->path,
+            'fragment' => $this->fragment,
+            'query' => $this->query
+        );
+    }
 
-	public function getHost() {
-		return $this->_host;
-	}
+    public function getScheme()
+    {
+        return $this->scheme;
+    }
 
-	public function getPort() {
-		return $this->_port;
-	}
+    public function getHost()
+    {
+        return $this->host;
+    }
 
-	public function getPath() {
-		return $this->_path;
-	}
+    public function getPort()
+    {
+        return $this->port;
+    }
 
-	public function getQuery() {
-		return $this->_query;
-	}
+    public function getPath()
+    {
+        return $this->path;
+    }
 
-	public function getQueryData($key = null) {
-		if ($key === null) {
-			return $this->_queryData;
-		}
+    public function getQuery()
+    {
+        return $this->query;
+    }
 
-		if ($this->hasQueryData($key)) {
-			return $this->_queryData[$key];
-		}
+    public function getQueryData($key = null)
+    {
+        if ($key === null) {
+            return $this->queryData;
+        }
 
-		return null;
-	}
+        if ($this->hasQueryData($key)) {
+            return $this->queryData[$key];
+        }
 
-	public function hasQueryData($key) {
-		return isset($this->_queryData[$key]);
-	}
+        return null;
+    }
 
-	public function getFragment() {
-		return $this->_fragment;
-	}
+    public function hasQueryData($key)
+    {
+        return isset($this->queryData[$key]);
+    }
 
-	public function getAuthUser() {
-		return $this->_user;
-	}
+    public function getFragment()
+    {
+        return $this->fragment;
+    }
 
-	public function getAuthPass() {
-		return $this->_pass;
-	}
+    public function getAuthUser()
+    {
+        return $this->user;
+    }
 
-	public function getHostTld() {
-		// @todo Implement me
-		return '';
-	}
+    public function getAuthPass()
+    {
+        return $this->pass;
+    }
 
-	public function getHostIp() {
-		// @todo Implement me
-		return '127.0.0.1';
-	}
+    public function getHostTld()
+    {
+        // @todo Implement me
+        return '';
+    }
 
-/**
- * Get Url
- *
- * @return string
- */
-	public function getUrl() {
-		// scheme
-		$scheme = '';
-		if ($this->_scheme) {
-			$scheme = $this->_scheme . '://';
-		}
+    public function getHostIp()
+    {
+        // @todo Implement me
+        return '127.0.0.1';
+    }
 
-		// auth
-		$auth = '';
-		if ($this->_user && $this->_pass) {
-			$auth = $this->_user . ':' . $this->_pass . '@';
-		} elseif ($this->_user) {
-			$auth = $this->_user . '@';
-		}
+    /**
+     * Get Url
+     *
+     * @return string
+     */
+    public function getUrl()
+    {
+        // scheme
+        $scheme = '';
+        if ($this->scheme) {
+            $scheme = $this->scheme . '://';
+        }
 
-		// host
-		$host = $this->_host;
-		if ($this->_port) {
-			$host .= ':' . $this->_port;
-		}
+        // auth
+        $auth = '';
+        if ($this->user && $this->pass) {
+            $auth = $this->user . ':' . $this->pass . '@';
+        } elseif ($this->user) {
+            $auth = $this->user . '@';
+        }
 
-		// path
-		$path = $this->_path;
+        // host
+        $host = $this->host;
+        if ($this->port) {
+            $host .= ':' . $this->port;
+        }
 
-		// query
-		$query = '';
-		if ($this->_query) {
-			$query = '?' . $this->_query;
-		}
+        // path
+        $path = $this->path;
 
-		// fragment
-		$fragment = '';
-		if ($this->_fragment) {
-			$fragment = '#' . $this->_fragment;
-		}
+        // query
+        $query = '';
+        if ($this->query) {
+            $query = '?' . $this->query;
+        }
 
-		return $scheme . $auth . $host . $path . $query . $fragment;
-	}
+        // fragment
+        $fragment = '';
+        if ($this->fragment) {
+            $fragment = '#' . $this->fragment;
+        }
 
-/**
- * @return string
- */
-	public function getRawUrl() {
-		return $this->_url;
-	}
+        return $scheme . $auth . $host . $path . $query . $fragment;
+    }
 
-	public function __toString() {
-		return $this->getUrl();
-	}
+    /**
+     * @return string
+     */
+    public function getRawUrl()
+    {
+        return $this->url;
+    }
+
+    public function offsetGet($offset)
+    {
+
+    }
+
+    public function offsetSet($offset, $value)
+    {
+
+    }
+
+    public function offsetExists($offset)
+    {
+
+    }
+
+    public function offsetUnset($offset)
+    {
+
+    }
+
+    public function __toString()
+    {
+        return $this->getUrl();
+    }
 }
