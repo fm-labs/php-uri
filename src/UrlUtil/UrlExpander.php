@@ -154,6 +154,11 @@ class UrlExpander
         return $this;
     }
 
+    public function getRedirectCount()
+    {
+        return count($this->trace);
+    }
+
     /**
      * @param string $url
      * @return array
@@ -188,7 +193,7 @@ class UrlExpander
      * @param string $header
      * @return array
      */
-    public function parseHttpStatus($header)
+    protected function parseHttpStatus($header)
     {
         if (preg_match(self::HTTP_HEADER_REGEX, $header, $matches)) {
             return array(
