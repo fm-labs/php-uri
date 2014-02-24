@@ -13,7 +13,7 @@ URL Toolbox for PHP
 
 
 ##### UrlParser
- Object-oriented equivalent of parse_str
+ Object-oriented equivalent of parse_url
 
 ##### UrlNormalizer
 
