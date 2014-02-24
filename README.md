@@ -1,40 +1,44 @@
-php-urlutil
-===========
+# php-urlutil
 
 URL Toolbox for PHP
 
 
-Requirements
-------------
-
-- php 5.3
+## Requirements
 
 
-Included
---------
-
-UrlParser
-Object-oriented equivalent of parse_str
-
-UrlNormalizer
+- php 5.3+
 
 
-Usage
-------
-
-UrlParser
-
-$url = new UrlParser('http://www.example.org/test?q=hello#world);
-$schema = $url->getSchema(); // http
-$host = $url->getHost(); // www.example.org
-$path = $url->getPath(); // /test
-...
+## Included
 
 
-UrlNormalizer
+##### UrlParser
+ Object-oriented equivalent of parse_str
 
-$normalizer = new UrlNormalizer('hTTp://www.eXample.org:80/test./../foo/../bar);
-$normalizedUrl = $normalizer->normalize()->getUrl(); // http://www.example.org/test/foo/bar);
+##### UrlNormalizer
+
+## Installation
+
+
+@TODO
+
+
+## Usage
+
+
+#### UrlParser
+
+  $url = new \UrlUtil\UrlParser('http://www.example.org/test?q=hello#world);
+  $schema = $url->getSchema(); // http
+  $host = $url->getHost(); // www.example.org
+  $path = $url->getPath(); // /test
+  //...
+
+
+#### UrlNormalizer
+
+  $normalizer = new \UrlUtil\UrlNormalizer('hTTp://www.eXample.org:80/test./../foo/../bar);
+  $normalizedUrl = $normalizer->normalize()->getUrl(); // http://www.example.org/test/foo/bar);
 
 
 
