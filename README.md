@@ -28,17 +28,17 @@ URL Toolbox for PHP
 
 #### UrlParser
 
-  $url = new \UrlUtil\UrlParser('http://www.example.org/test?q=hello#world);
-  $schema = $url->getSchema(); // http
-  $host = $url->getHost(); // www.example.org
-  $path = $url->getPath(); // /test
-  //...
+    $url = new \UrlUtil\UrlParser('http://www.example.org/test?q=hello#world);
+    $schema = $url->getSchema(); // http
+    $host = $url->getHost(); // www.example.org
+    $path = $url->getPath(); // /test
+    //...
 
 
 #### UrlNormalizer
 
-  $normalizer = new \UrlUtil\UrlNormalizer('hTTp://www.eXample.org:80/test./../foo/../bar);
-  $normalizedUrl = $normalizer->normalize()->getUrl(); // http://www.example.org/test/foo/bar);
+    $normalizer = new \UrlUtil\UrlNormalizer('hTTp://www.eXample.org:80/test./../foo/../bar);
+    $normalizedUrl = $normalizer->normalize()->getUrl(); // http://www.example.org/test/foo/bar);
 
 
 
