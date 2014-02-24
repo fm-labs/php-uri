@@ -61,6 +61,13 @@ class UrlNormalizerTest extends \PHPUnit_Framework_TestCase
         $this->assertEqual($n->normalize()->getUrl(), 'http://example.org/test/?q=1#frag');
     }
 
+    public function testStaticCapitalizeEscapeSequences() {
+        $url = 'http://www.example.com/a%c2%b1b/';
+        $expected = 'http://www.example.com/a%C2%B1b/';
+
+        $this->assertEqual(UrlNormalizer::capitalizeEscapeSequences($url), $expected);
+    }
+
     public function testCapitalizeEscapeSequences()
     {
         $url = 'http://www.example.com/a%c2%b1b/';
@@ -70,7 +77,7 @@ class UrlNormalizerTest extends \PHPUnit_Framework_TestCase
         $this->assertEqual($n->normalize()->getUrl(), $expected);
     }
 
-    public function testDecodeUnreservedCharsHelperMethod()
+    public function testStaticDecodeUnreservedChars()
     {
         $tests = array(
             '%41' => 'A',
@@ -88,8 +95,7 @@ class UrlNormalizerTest extends \PHPUnit_Framework_TestCase
         );
 
         foreach ($tests as $encoded => $unencoded) {
-            $n = new UrlNormalizer();
-            $this->assertEqual($n->decodeUnreservedChars($encoded), $unencoded);
+            $this->assertEqual(UrlNormalizer::decodeUnreservedChars($encoded), $unencoded);
         }
     }
 
