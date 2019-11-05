@@ -1,6 +1,7 @@
 {
     "name": "fm-labs/php-uri",
     "description": "Simple URI library for PHP",
+    "license": "See LICENSE file",
     "minimum-stability": "stable",
     "authors": [
         {

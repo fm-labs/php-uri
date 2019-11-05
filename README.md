@@ -147,7 +147,7 @@ $ ./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/
 
 ## License
 
-Free To Use
+This is free and unencumbered software released into the public domain.
 
 See LICENSE file
 
