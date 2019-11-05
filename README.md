@@ -2,6 +2,7 @@
 
 Simple URI library for PHP
 
+[![Build Status](https://travis-ci.org/fm-labs/php-uri.svg?branch=master)](https://travis-ci.org/fm-labs/php-uri)
 
 ## Requirements
 
