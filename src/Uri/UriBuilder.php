@@ -7,7 +7,7 @@ namespace FmLabs\Uri;
 class UriBuilder extends Uri
 {
     /**
-     * @param string $url
+     * @param string $uri
      */
     public function __construct($uri)
     {
@@ -121,4 +121,5 @@ class UriBuilder extends Uri
     {
         $this->set($offset, null);
     }
+
 }

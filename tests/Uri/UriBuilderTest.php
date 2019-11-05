@@ -3,71 +3,76 @@
 namespace FmLabs\Test\Uri;
 
 
+use FmLabs\Uri\UriBuilder;
+
 class UriBuilderTest extends \PHPUnit\Framework\TestCase
 {
 
-    public function test__construct()
-    {
-        $this->markTestIncomplete();
-    }
-
-    public function test__set()
-    {
-        $this->markTestIncomplete();
-    }
-
-    public function testSetFragment()
-    {
-        $this->markTestIncomplete();
-    }
-
-    public function testSetQuery()
-    {
-        $this->markTestIncomplete();
-    }
-
-    public function testSetPort()
-    {
-        $this->markTestIncomplete();
-    }
-
     public function testSetScheme()
     {
-        $this->markTestIncomplete();
+        $builder = new UriBuilder("https://user:secret@www.example.org/my/path?some=query#frag");
+        $builder->setScheme("http");
+        $this->assertEquals("http", $builder->toUri()->getScheme());
+    }
+
+    public function testSetUserInfo()
+    {
+        $builder = new UriBuilder("https://user:secret@www.example.org/my/path?some=query#frag");
+        $builder->setUser("admin");
+        $builder->setUserPass("somepass");
+        $this->assertEquals("admin:somepass", $builder->toUri()->getUserInfo());
     }
 
     public function testSetHost()
     {
-        $this->markTestIncomplete();
+        $builder = new UriBuilder("https://user:secret@www.example.org/my/path?some=query#frag");
+        $builder->setHost("example.net");
+        $this->assertEquals("example.net", $builder->toUri()->getHost());
     }
 
-    public function testSetUser()
+    public function testSetPort()
     {
-        $this->markTestIncomplete();
+        $builder = new UriBuilder("https://user:secret@www.example.org/my/path?some=query#frag");
+        $builder->setPort(8080);
+        $this->assertEquals("8080", $builder->toUri()->getPort());
     }
 
     public function testSetPath()
     {
-        $this->markTestIncomplete();
+        $builder = new UriBuilder("https://user:secret@www.example.org/my/path?some=query#frag");
+        $builder->setPath("/foo/bar");
+        $this->assertEquals("/foo/bar", $builder->toUri()->getPath());
     }
 
-    public function testSetUserPass()
+    public function testSetQuery()
     {
-        $this->markTestIncomplete();
+        $builder = new UriBuilder("https://user:secret@www.example.org/my/path?some=query#frag");
+        $builder->setQuery("foo=bar&a=b");
+        $this->assertEquals("foo=bar&a=b", $builder->toUri()->getQuery());
     }
 
-    public function testToUri()
+    public function testSetFragment()
     {
-        $this->markTestIncomplete();
+        $builder = new UriBuilder("https://user:secret@www.example.org/my/path?some=query#frag");
+        $builder->setFragment("other");
+        $this->assertEquals("other", $builder->toUri()->getFragment());
     }
 
     public function testOffsetUnset()
     {
-        $this->markTestIncomplete();
+        $builder = new UriBuilder("https://user:secret@www.example.org/my/path?some=query#frag");
+        unset($builder['pass']);
+        $this->assertEquals("user", $builder->toUri()->getUserInfo());
+        unset($builder['fragment']);
+        $this->assertEquals(null, $builder->toUri()->getFragment());
     }
 
     public function testOffsetSet()
     {
-        $this->markTestIncomplete();
+        $builder = new UriBuilder("https://user:secret@www.example.org/my/path?some=query#frag");
+        $builder['pass'] = 'othersecret';
+        $this->assertEquals("user:othersecret", $builder->toUri()->getUserInfo());
+        $builder['fragment'] = 'other';
+        $this->assertEquals("other", $builder->toUri()->getFragment());
     }
 }

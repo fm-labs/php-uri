@@ -117,7 +117,7 @@ class UriNormalizerTest extends \PHPUnit\Framework\TestCase
 
     public function testRemoveDotSegments()
     {
-        $this->markTestIncomplete('Implement me');
+        $this->markTestIncomplete('Implement all the dot segment removal methods and tests');
     }
 
     public function testAllQueryNormalizations()

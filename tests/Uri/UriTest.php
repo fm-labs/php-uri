@@ -121,7 +121,7 @@ class UriTest extends \PHPUnit\Framework\TestCase
 
     public function testGetQueryData()
     {
-        //$this->skipIf(true, 'Implement me');
+        $this->markTestIncomplete();
     }
 
     public function testUriHttps()
@@ -253,5 +253,54 @@ class UriTest extends \PHPUnit\Framework\TestCase
         $uri = new Uri("https://foo:bar@example.org");
         unset($uri['scheme']); // setters have no effect
         $this->assertEquals('https', $uri['scheme']);
+    }
+
+    public function testWithScheme()
+    {
+        $uri = new Uri("https://user:secret@www.example.org/my/path?some=query#frag");
+        $uri2 = $uri->withScheme("http");
+        $this->assertEquals("http", $uri2->getScheme());
+    }
+
+    public function testWithUserInfo()
+    {
+        $uri = new Uri("https://user:secret@www.example.org/my/path?some=query#frag");
+        $uri2 = $uri->withUserInfo("admin", "somepass");
+        $this->assertEquals("admin:somepass", $uri2->getUserInfo());
+    }
+
+    public function testWithHost()
+    {
+        $uri = new Uri("https://user:secret@www.example.org/my/path?some=query#frag");
+        $uri2 = $uri->withHost("example.net");
+        $this->assertEquals("example.net", $uri2->getHost());
+    }
+
+    public function testWithPort()
+    {
+        $uri = new Uri("https://user:secret@www.example.org/my/path?some=query#frag");
+        $uri2 = $uri->withPort(8080);
+        $this->assertEquals("8080", $uri2->getPort());
+    }
+
+    public function testWithPath()
+    {
+        $uri = new Uri("https://user:secret@www.example.org/my/path?some=query#frag");
+        $uri2 = $uri->withPath("/foo/bar");
+        $this->assertEquals("/foo/bar", $uri2->getPath());
+    }
+
+    public function testWithQuery()
+    {
+        $uri = new Uri("https://user:secret@www.example.org/my/path?some=query#frag");
+        $uri2 = $uri->withQuery("foo=bar&a=b");
+        $this->assertEquals("foo=bar&a=b", $uri2->getQuery());
+    }
+
+    public function testWithFragment()
+    {
+        $uri = new Uri("https://user:secret@www.example.org/my/path?some=query#frag");
+        $uri2 = $uri->withFragment("other");
+        $this->assertEquals("other", $uri2->getFragment());
     }
 }
