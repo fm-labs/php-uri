@@ -1,20 +1,24 @@
 {
-    "name": "fm-labs/php-urlutil",
-    "description": "URL Toolbox for PHP",
+    "name": "fm-labs/php-uri",
+    "description": "Simple URI library for PHP",
     "minimum-stability": "stable",
     "authors": [
         {
-            "name": "Florian Beisskammer",
+            "name": "fm-labs",
             "email": "office@flowmotion-labs.com"
         }
     ],
     "require-dev": {
-        "phpunit/phpunit": "3.7.*"
+        "phpunit/phpunit": "^6"
     },
     "autoload": {
         "psr-4": {
-            "": "src/"
+            "FmLabs\\Uri\\": "src/Uri"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "FmLabs\\Test\\Uri\\": "tests/Uri"
         }
     }
-
 }

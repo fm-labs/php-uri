@@ -1,13 +1,13 @@
 <?php
-namespace UrlUtil;
+namespace FmLabs\Uri;
 
 /**
- * UrlNormalizer
+ * UriNormalizer
  *
  * @link http://tools.ietf.org/html/rfc3986
  * @link http://en.wikipedia.org/wiki/URL_normalization
  */
-class UrlNormalizer extends UrlParser
+class UriNormalizer
 {
 
     /**
@@ -21,48 +21,57 @@ class UrlNormalizer extends UrlParser
     /**
      * @var array
      */
-    protected $defaultPortMap = array(
+    static protected $defaultPorts = array(
         'http' => 80,
-        'https' => 443
+        'https' => 443,
     );
 
     /**
-     * Normalize Url
+     * Normalize Uri
+     *
+     * @param \FmLabs\Uri\Uri $uri
+     * @param array $options
+     * @return \FmLabs\Uri\Uri
      */
-    public function normalize()
+    static public function normalize(\FmLabs\Uri\Uri $uri, array $options = [])
     {
+        $builder = new UriBuilder($uri);
         /*
          * PRESERVE SEMANTICS
          */
 
         // Converting the scheme and host to lower case
-        if ($this->scheme) {
-            $this->scheme = strtolower($this->scheme);
+        if ($uri->getScheme()) {
+            $builder->setScheme(strtolower($uri->getScheme()));
         }
-        if ($this->host) {
-            $this->host = strtolower($this->host);
+        if ($uri->getHost()) {
+            $builder->setHost(strtolower($uri->getHost()));
         }
 
-        if ($this->path) {
+        if ($uri->getPath()) {
+            $normPath = $uri->getPath();
+            
             // Capitalizing letters in escape sequences
-            $this->path = self::capitalizeEscapeSequences($this->path);
+            $normPath = self::capitalizeEscapeSequences($normPath);
 
             // Decoding percent-encoded octets of unreserved characters
-            $this->path = self::decodeUnreservedChars($this->path);
+            $normPath = self::decodeUnreservedChars($normPath);
+
+            $builder->setPath($normPath);
         }
 
         // Removing default ports
-        if ($this->scheme && isset($this->defaultPortMap[$this->scheme])) {
-            if ($this->port && $this->port == $this->defaultPortMap[$this->scheme]) {
-                $this->port = null;
+        if ($uri->getScheme() && isset(self::$defaultPorts[$uri->getScheme()])) {
+            if ($uri->getPort() && $uri->getPort() == self::$defaultPorts[$uri->getScheme()]) {
+                $builder->setPort(null);
             }
         }
 
         // Add trailing slash
-        if (!$this->path) {
-            $this->path = '/';
-        } elseif (substr($this->path, -1) != '/') {
-            $this->path .= '/';
+        if (!$uri->getPath()) {
+            $builder->setPath('/');
+        } elseif (substr($uri->getPath(), -1) != '/') {
+            $builder->setPath($uri->getPath() . '/');
         }
 
         // @todo Removing dot-segments
@@ -81,7 +90,7 @@ class UrlNormalizer extends UrlParser
         // @todo Removing unused query variables
         // @todo Removing the "?" when the query is empty
 
-        return $this;
+        return $builder->toUri();
     }
 
     public static function capitalizeEscapeSequences($string)
