@@ -128,7 +128,8 @@ $ ./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/
 
 ## License
 
-Free to use
+Free To Use
+See LICENSE file
 
 
 
