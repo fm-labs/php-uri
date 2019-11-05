@@ -9,8 +9,10 @@ Simple URI library for PHP
 
 ## Installation
 
- $ cd /my/project/dir
- $ composer require fm-labs/php-uri ^0.3
+```console
+$ cd /my/project/dir
+$ composer require fm-labs/php-uri ^0.3
+```
 
 ## Components
 
@@ -52,30 +54,43 @@ Simple URI library for PHP
 
 ### Uri
 
-    $uri = new \FmLabs\Uri\Uri('http://www.example.org/test?q=hello#world);
-    $schema = $uri->getSchema(); // "http"
-    $host = $uri->getHost(); // "www.example.org"
-    $path = $uri->getPath(); // "/test"
-    $frag = $uri->getFragment(); // "world"
-
+```php
+$uri = new \FmLabs\Uri\Uri('http://www.example.org/test?q=hello#world);
+$schema = $uri->getSchema(); // "http"
+$host = $uri->getHost(); // "www.example.org"
+$path = $uri->getPath(); // "/test"
+$frag = $uri->getFragment(); // "world"
+```
 
 ### UriBuilder
 
-    $builder = new \FmLabs\Uri\UriBuilder();
-    $builder
-        ->setSchema('http')
-        ->setHost('www.example.org)
-        ->setPort(8080)
-        ->setPath('/my/path')
-    ;
-    $uri = $builder->toUri();
-    $uri->toString(); // http://www.example.org:8080/my/path
+```php
+$builder = new \FmLabs\Uri\UriBuilder();
+$builder
+    ->setSchema('http')
+    ->setHost('www.example.org)
+    ->setPort(8080)
+    ->setPath('/my/path')
+;
+$uri = $builder->toUri();
+$uri->toString(); // http://www.example.org:8080/my/path
+```
 
 ### UrlNormalizer
 
-    $uri = \FmLabs\Uri\UriNormalizer::normalize('hTTp://www.eXample.org:80/test./../foo/../bar);
-    $uri->toString(); // http://www.example.org/test/foo/bar);
+```php
+$uri = \FmLabs\Uri\UriNormalizer::normalize('hTTp://www.eXample.org:80/test./../foo/../bar);
+$uri->toString(); // http://www.example.org/test/foo/bar);
+```
 
+## Run tests
+```console
+$ composer run-script test
+// or
+$ composer run-script test-verbose
+// or
+$ ./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/
+```
 
 ## TODO
 
@@ -109,10 +124,6 @@ Simple URI library for PHP
 
 [0.2]
 - Added UrlExpander util class (requires curl)
-
-## Run tests
-
- $ ./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/
 
 ## License
 

@@ -20,5 +20,9 @@
         "psr-4": {
             "FmLabs\\Test\\Uri\\": "tests/Uri"
         }
+    },
+    "scripts": {
+        "test": "./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/",
+        "test-verbose": "./vendor/bin/phpunit -vv --bootstrap tests/bootstrap.php tests/"
     }
 }
