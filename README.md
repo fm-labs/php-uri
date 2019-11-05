@@ -69,7 +69,7 @@ $frag = $uri->getFragment(); // "world"
 $builder = new \FmLabs\Uri\UriBuilder();
 $builder
     ->setSchema('http')
-    ->setHost('www.example.org)
+    ->setHost('www.example.org')
     ->setPort(8080)
     ->setPath('/my/path')
 ;
