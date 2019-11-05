@@ -19,35 +19,51 @@ $ composer require fm-labs/php-uri ^0.3
 
 ### Uri
 
-- getScheme()
-- getUser()
-- getUserPass()
-- getHost()
-- getPort()
-- getPath()
-- getQuery()
-- getFragment()
-- getUserInfo()
-- getHostInfo()
-- getAuthority()
-- toString()
-- toArray()
+Is compliant to the PSR-7 UriInterface
+
+- `getScheme()`
+- `getUser()`
+- `getUserPass()`
+- `getHost()`
+- `getPort()`
+- `getPath()`
+- `getQuery()`
+- `getFragment()`
+- `getUserInfo()`
+- `getAuthority()`
+- `getHostInfo()`
+- `getUser()`
+- `getUserPass()`
+- `getQueryData()`
+- `withScheme()`
+- `withHost()`
+- `withPort()`
+- `withUserInfo()`
+- `withPath()`
+- `withQuery()`
+- `withFragment()`
+- `toString()`
+- `toArray()`
+- `__toString()`
 
 ### UriBuilder
 
-- setScheme()
-- setUser()
-- setUserPass()
-- setHost()
-- setPort()
-- setPath()
-- setQuery()
-- setFragment()
-- toUri()
+Basically an extended `Uri` object with setter methods.
+(Might be dropped in the future in favour of the UriInterface's 'with*'-methods).
+
+- `setScheme()`
+- `setUser()`
+- `setUserPass()`
+- `setHost()`
+- `setPort()`
+- `setPath()`
+- `setQuery()`
+- `setFragment()`
+- `toUri()`
 
 ### UriNormalizer
 
-- static normalize() - Returns Uri object with normalized component values
+- `static normalize()` - Returns `Uri` object with normalized component values
 
 
 ## Usage
@@ -80,7 +96,7 @@ $uri->toString(); // http://www.example.org:8080/my/path
 ### UrlNormalizer
 
 ```php
-$uri = \FmLabs\Uri\UriNormalizer::normalize('hTTp://www.eXample.org:80/test./../foo/../bar);
+$uri = \FmLabs\Uri\UriNormalizer::normalize('hTTp://www.eXample.org:80/test/./../foo/../bar);
 $uri->toString(); // http://www.example.org/test/foo/bar);
 ```
 
@@ -112,6 +128,9 @@ $ ./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/
 - Project: Add LICENSE
 
 ## Changelog
+[0.3.1]
+- Added PSR-7 compatibility. Uri now implements PSR UriInterface
+- Added TravisCI build targets php7.2 & php7.3
 
 [0.3]
 - Changed namespace to '\FmLabs\Uri'
