@@ -1,29 +1,50 @@
 # php-uri
 
-Simple URI library for PHP
+Simple URI library for PHP. Compliant to PSR-7 UriInterface specification.
+Includes RFC3968-compliant URI normalizer.
 
 [![Build Status](https://travis-ci.org/fm-labs/php-uri.svg?branch=master)](https://travis-ci.org/fm-labs/php-uri)
 
 ## Requirements
 
-- php 7.0+
+- php 7.1+
 
 ## Installation
 
 ```console
-$ cd /my/project/dir
-$ composer require fm-labs/php-uri ^0.3
+$ composer require fm-labs/php-uri ^0.4
 ```
 
-## Components
+## Classes
 
 ### Uri
 
-Is compliant to the PSR-7 UriInterface
+```php
+$uri = \FmLabs\Uri\UriFactory::fromString('http://user:s3cret@www.example.org/test?q=hello#world');
+// PSR-7 interface methods
+$schema = $uri->getScheme(); // "http"
+$host = $uri->getHost(); // "www.example.org"
+$path = $uri->getPath(); // "/test"
+$frag = $uri->getFragment(); // "world"
+$userinfo = $uri->getUserInfo(); // "user:s3cret"
+$authority = $uri->getAuthority(); // "user:s3cret@www.example.org"
+
+// Convenience methods
+$user = $uri->getUser(); // "user"
+$pass = $uri->getUserPass(); // "s3cret"
+$queryData = $uri->getQueryData(); // ['q' => 'hello']
+
+// Array access (read-only)
+$host = $uri['host'];
+
+// Property access (read-only)
+$host = $uri->host;
+
+```
+
+#### PSR-7 UriInterface methods
 
 - `getScheme()`
-- `getUser()`
-- `getUserPass()`
 - `getHost()`
 - `getPort()`
 - `getPath()`
@@ -31,10 +52,8 @@ Is compliant to the PSR-7 UriInterface
 - `getFragment()`
 - `getUserInfo()`
 - `getAuthority()`
-- `getHostInfo()`
-- `getUser()`
-- `getUserPass()`
-- `getQueryData()`
+- `__toString()`
+  
 - `withScheme()`
 - `withHost()`
 - `withPort()`
@@ -42,63 +61,76 @@ Is compliant to the PSR-7 UriInterface
 - `withPath()`
 - `withQuery()`
 - `withFragment()`
-- `toString()`
-- `toArray()`
-- `__toString()`
 
-### UriBuilder
+#### Convenience methods
 
-Basically an extended `Uri` object with setter methods.
-(Might be dropped in the future in favour of the UriInterface's 'with*'-methods).
+- `getHostInfo()` - Returns hostinfo string
+- `getUser()` - Returns userinfo username
+- `getUserPass()` - Returns userinfo password
+- `getQueryData(?string $key = null)` - Returns query data as array OR value for specific key
+- `getComponents()` - Returns components as array
 
-- `setScheme()`
-- `setUser()`
-- `setUserPass()`
-- `setHost()`
-- `setPort()`
-- `setPath()`
-- `setQuery()`
-- `setFragment()`
-- `toUri()`
+
+#### Array and Property Access
+Available Keys: 
+`scheme`, `host`, `port`, `path`, `query`, `fragment`, `user`, `pass`, `userinfo`, `authority`, `hostinfo`, `querydata`
+
+```php
+/** @var \FmLabs\Uri\Uri $uri **/
+
+// Array access
+$uri['KEY_NAME'];
+
+// Property access
+$uri->KEY_NAME;
+```
+
+
+
+
+### UriFactory
+
+Create Uri object from UriFactory
+
+#### `UriFactory::fromString(string $uriString)`
+```php
+// Examples
+\FmLabs\Uri\UriFactory::fromString('http://www.example.org');
+\FmLabs\Uri\UriFactory::fromString('https://user:secret@www.example.org/my/path?some=query#frag');
+\FmLabs\Uri\UriFactory::fromString('https://john.doe@www.example.com:123/forum/questions/?tag=networking&order=newest#top');
+\FmLabs\Uri\UriFactory::fromString('mailto:John.Doe@example.com');
+\FmLabs\Uri\UriFactory::fromString('tel:+1-816-555-1212');
+\FmLabs\Uri\UriFactory::fromString('ldap://[2001:db8::7]/c=GB?objectClass?one');
+\FmLabs\Uri\UriFactory::fromString('urn:oasis:names:specification:docbook:dtd:xml:4.1.2');
+```
+
+#### `UriFactory::fromComponents(array $components)`
+```php
+// Examples
+// http://www.example.org
+\FmLabs\Uri\UriFactory::fromComponents(['scheme' => 'http', 'host' => 'www.example.org']);
+// tel:+123456789
+\FmLabs\Uri\UriFactory::fromComponents(['scheme' => 'tel', 'path' => '+123456789']);
+```
+
+#### `UriFactory::fromUri(UriInterface $uri)`
+Create `\FmLabs\Uri\Uri` object from any `UriInterface`. 
 
 ### UriNormalizer
 
-- `static normalize()` - Returns `Uri` object with normalized component values
+#### `static normalize()`
+Normalize URI. See [RFC3968](http://tools.ietf.org/html/rfc3986)
+and [here](http://en.wikipedia.org/wiki/URL_normalization).
+
+Returns a new `Uri` object with normalized components. 
+
+```php
+$uri = \FmLabs\Uri\UriNormalizer::normalize('hTTp://www.eXample.org:80/test/./../foo/../bar');
+// http://www.example.org/test/foo/bar;
+```
 
 
 ## Usage
-
-
-### Uri
-
-```php
-$uri = new \FmLabs\Uri\Uri('http://www.example.org/test?q=hello#world);
-$schema = $uri->getSchema(); // "http"
-$host = $uri->getHost(); // "www.example.org"
-$path = $uri->getPath(); // "/test"
-$frag = $uri->getFragment(); // "world"
-```
-
-### UriBuilder
-
-```php
-$builder = new \FmLabs\Uri\UriFactory();
-$builder
-    ->setSchema('http')
-    ->setHost('www.example.org')
-    ->setPort(8080)
-    ->setPath('/my/path')
-;
-$uri = $builder->toUri();
-$uri->toString(); // http://www.example.org:8080/my/path
-```
-
-### UrlNormalizer
-
-```php
-$uri = \FmLabs\Uri\UriNormalizer::normalize('hTTp://www.eXample.org:80/test/./../foo/../bar);
-$uri->toString(); // http://www.example.org/test/foo/bar);
-```
 
 ## Run tests
 ```console
@@ -121,13 +153,17 @@ $ ./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/
 - UriNormalizer: normalize: Sorting the query parameters
 - UriNormalizer: normalize: Removing unused query variables
 - UriNormalizer: normalize: Removing the "?" when the query is empty
-- UriNormalizer: Add more known default ports
-- UriBuilder: Build and set query string from query data array
-- PHP: Upgrade to 7.1
-- PHPUnit: Upgrade to PHPUnit7
-- Project: Add LICENSE
 
 ## Changelog
+[0.4]
+- Dropped UriBuilder in favor of UriFactory
+- Added UriFactory  
+- Changed Uri constructor
+- Changed PHP language level to 7.1
+- Changed license to MIT license
+- Tests: Upgraded to PHPUnit8
+- Code style fixes
+
 [0.3.1]
 - Added PSR-7 compatibility. Uri now implements PSR UriInterface
 - Added TravisCI build targets php7.2 & php7.3
@@ -146,8 +182,6 @@ $ ./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/
 - Added UrlExpander util class (requires curl)
 
 ## License
-
-This is free and unencumbered software released into the public domain.
 
 See LICENSE file
 
