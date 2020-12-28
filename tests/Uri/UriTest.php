@@ -48,6 +48,9 @@ class UriTest extends \PHPUnit\Framework\TestCase
         $uri = UriFactory::fromString('http://www.example.org');
         $this->assertEquals('www.example.org', $uri->getHostInfo());
 
+        $uri = UriFactory::fromString('http://www.example.org:80');
+        $this->assertEquals('www.example.org:80', $uri->getHostInfo());
+
         $uri = UriFactory::fromString('http://www.example.org:8080');
         $this->assertEquals('www.example.org:8080', $uri->getHostInfo());
     }
@@ -203,7 +206,7 @@ class UriTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($uri->getAuthority(), $uri->authority);
         $this->assertEquals($uri->getPath(), $uri->path);
         $this->assertEquals($uri->getQuery(), $uri->query);
-        $this->assertEquals($uri->getQueryData(), $uri->query_data);
+        $this->assertEquals($uri->getQueryData(), $uri->querydata);
         $this->assertEquals($uri->getFragment(), $uri->fragment);
         //$this->assertEquals((string)$uri, $uri->url);
     }
@@ -221,7 +224,7 @@ class UriTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($uri->getAuthority(), $uri['authority']);
         $this->assertEquals($uri->getPath(), $uri['path']);
         $this->assertEquals($uri->getQuery(), $uri['query']);
-        $this->assertEquals($uri->getQueryData(), $uri['query_data']);
+        $this->assertEquals($uri->getQueryData(), $uri['querydata']);
         $this->assertEquals($uri->getFragment(), $uri['fragment']);
         //$this->assertEquals((string)$uri, $uri['url']);
     }
@@ -238,7 +241,7 @@ class UriTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue(isset($uri['authority']));
         $this->assertTrue(isset($uri['path']));
         $this->assertTrue(isset($uri['query']));
-        $this->assertTrue(isset($uri['query_data']));
+        $this->assertTrue(isset($uri['querydata']));
         $this->assertTrue(isset($uri['fragment']));
         //$this->assertTrue(isset($uri['url']));
     }
@@ -247,6 +250,8 @@ class UriTest extends \PHPUnit\Framework\TestCase
     {
         $uri = UriFactory::fromString('https://user:secret@www.example.org/my/path?some=query#frag');
         $uri2 = $uri->withScheme('http');
+
+        $this->assertEquals('https', $uri->getScheme());
         $this->assertEquals('http', $uri2->getScheme());
     }
 
@@ -254,6 +259,7 @@ class UriTest extends \PHPUnit\Framework\TestCase
     {
         $uri = UriFactory::fromString('https://user:secret@www.example.org/my/path?some=query#frag');
         $uri2 = $uri->withUserInfo('admin', 'somepass');
+        $this->assertEquals('user:secret', $uri->getUserInfo());
         $this->assertEquals('admin:somepass', $uri2->getUserInfo());
     }
 
@@ -261,6 +267,7 @@ class UriTest extends \PHPUnit\Framework\TestCase
     {
         $uri = UriFactory::fromString('https://user:secret@www.example.org/my/path?some=query#frag');
         $uri2 = $uri->withHost('example.net');
+        $this->assertEquals('www.example.org', $uri->getHost());
         $this->assertEquals('example.net', $uri2->getHost());
     }
 
@@ -268,6 +275,7 @@ class UriTest extends \PHPUnit\Framework\TestCase
     {
         $uri = UriFactory::fromString('https://user:secret@www.example.org/my/path?some=query#frag');
         $uri2 = $uri->withPort(8080);
+        $this->assertEquals(null, $uri->getPort());
         $this->assertEquals('8080', $uri2->getPort());
     }
 
@@ -275,6 +283,7 @@ class UriTest extends \PHPUnit\Framework\TestCase
     {
         $uri = UriFactory::fromString('https://user:secret@www.example.org/my/path?some=query#frag');
         $uri2 = $uri->withPath('/foo/bar');
+        $this->assertEquals('/my/path', $uri->getPath());
         $this->assertEquals('/foo/bar', $uri2->getPath());
     }
 
@@ -282,6 +291,7 @@ class UriTest extends \PHPUnit\Framework\TestCase
     {
         $uri = UriFactory::fromString('https://user:secret@www.example.org/my/path?some=query#frag');
         $uri2 = $uri->withQuery('foo=bar&a=b');
+        $this->assertEquals('some=query', $uri->getQuery());
         $this->assertEquals('foo=bar&a=b', $uri2->getQuery());
     }
 
@@ -289,6 +299,7 @@ class UriTest extends \PHPUnit\Framework\TestCase
     {
         $uri = UriFactory::fromString('https://user:secret@www.example.org/my/path?some=query#frag');
         $uri2 = $uri->withFragment('other');
+        $this->assertEquals('frag', $uri->getFragment());
         $this->assertEquals('other', $uri2->getFragment());
     }
 

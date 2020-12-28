@@ -20,16 +20,36 @@ use Psr\Http\Message\UriInterface;
  * @property string $userinfo
  * @property string $hostinfo
  * @property string $authority
- * @property array $query_data
+ * @property array $querydata
  */
 class Uri implements UriInterface, ArrayAccess
 {
+    protected const SCHEME = 'scheme';
+    protected const USER = 'user';
+    protected const PASS = 'pass';
+    protected const HOST = 'host';
+    protected const PORT = 'port';
+    protected const PATH = 'path';
+    protected const FRAG = 'fragment';
+    protected const QUERY = 'query';
+
+    protected const HOSTINFO = 'hostinfo';
+    protected const USERINFO = 'userinfo';
+    protected const AUTHORITY = 'authority';
+    protected const QUERYDATA = 'querydata';
+
     /**
      * @var array List of URI component names
      */
     protected $components = [
-        'scheme' => null, 'user' => null, 'pass' => null, 'host' => null, 'port' => null,
-        'path' => null, 'fragment' => null, 'query' => null,
+        self::SCHEME => null,
+        self::USER => null,
+        self::PASS => null,
+        self::HOST => null,
+        self::PORT => null,
+        self::PATH => null,
+        self::FRAG => null,
+        self::QUERY => null,
     ];
 
     /**
@@ -64,8 +84,8 @@ class Uri implements UriInterface, ArrayAccess
                 $this->components[$key] = $val;
             }
         }
-        if (isset($components['query'])) {
-            parse_str($components['query'], $this->queryData);
+        if (isset($components[self::QUERY])) {
+            parse_str($components[self::QUERY], $this->queryData);
         }
     }
 
@@ -87,7 +107,7 @@ class Uri implements UriInterface, ArrayAccess
     protected function has(string $key)
     {
         return array_key_exists($key, $this->components)
-            || in_array($key, ['hostinfo', 'userinfo', 'authority', 'query_data', 'url']);
+            || in_array($key, [self::AUTHORITY, self::HOSTINFO, self::USERINFO, self::QUERYDATA]);
     }
 
     /**
@@ -97,13 +117,13 @@ class Uri implements UriInterface, ArrayAccess
     protected function get(string $key)
     {
         switch ($key) {
-            case 'authority':
+            case self::AUTHORITY:
                 return $this->getAuthority();
-            case 'userinfo':
+            case self::USERINFO:
                 return $this->getUserInfo();
-            case 'hostinfo':
+            case self::HOSTINFO:
                 return $this->getHostInfo();
-            case 'query_data':
+            case self::QUERYDATA:
                 return $this->getQueryData();
         }
 
@@ -115,7 +135,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getScheme()
     {
-        return $this->scheme;
+        return $this->components[self::SCHEME];
     }
 
     /**
@@ -123,7 +143,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getHost()
     {
-        return $this->host;
+        return $this->components[self::HOST];
     }
 
     /**
@@ -131,7 +151,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getPort()
     {
-        return $this->port;
+        return $this->components[self::PORT];
     }
 
     /**
@@ -139,7 +159,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getPath()
     {
-        return $this->path;
+        return $this->components[self::PATH];
     }
 
     /**
@@ -147,7 +167,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getQuery()
     {
-        return $this->query;
+        return $this->components[self::QUERY];
     }
 
     /**
@@ -155,7 +175,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getFragment()
     {
-        return $this->fragment;
+        return $this->components[self::FRAG];
     }
 
     /**
@@ -202,14 +222,14 @@ class Uri implements UriInterface, ArrayAccess
     public function getComponents()
     {
         return [
-            'scheme' => $this->scheme,
-            'user' => $this->user,
-            'pass' => $this->pass,
-            'host' => $this->host,
-            'port' => $this->port,
-            'path' => $this->path,
-            'fragment' => $this->fragment,
-            'query' => $this->query,
+            self::SCHEME => $this->scheme,
+            self::USER => $this->user,
+            self::PASS => $this->pass,
+            self::HOST => $this->host,
+            self::PORT => $this->port,
+            self::PATH => $this->path,
+            self::FRAG => $this->fragment,
+            self::QUERY => $this->query,
         ];
     }
 
@@ -218,7 +238,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getUser()
     {
-        return $this->user;
+        return $this->components[self::USER];
     }
 
     /**
@@ -226,7 +246,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getUserPass()
     {
-        return $this->pass;
+        return $this->components[self::PASS];
     }
 
     /**
@@ -235,31 +255,27 @@ class Uri implements UriInterface, ArrayAccess
      *
      * @return string
      */
-    public function getHostInfo()
+    public function getHostInfo(): ?string
     {
-        $info = $this->host;
-        if ($this->port) {
-            $info .= ':' . $this->port;
+        $info = $this->getHost();
+        if ($this->getPort()) {
+            $info .= ':' . $this->getPort();
         }
 
         return $info;
     }
 
     /**
-     * @param null $key Query data key. If NULL, returns array of all query data.
+     * @param null|string $key Query data key. If NULL, returns array of all query data.
      * @return array|mixed|null
      */
-    public function getQueryData($key = null)
+    public function getQueryData(?string $key = null)
     {
         if ($key === null) {
             return $this->queryData;
         }
 
-        if (isset($this->queryData[$key])) {
-            return $this->queryData[$key];
-        }
-
-        return null;
+        return $this->queryData[$key] ?? null;
     }
 
     /**
@@ -269,7 +285,6 @@ class Uri implements UriInterface, ArrayAccess
     protected function with(array $components): self
     {
         $components = array_merge($this->components, $components);
-        var_dump($components);
 
         return new self($components);
     }
@@ -291,7 +306,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withScheme($scheme)
     {
-        return $this->with(['scheme' => $scheme]);
+        return $this->with([self::SCHEME => $scheme]);
     }
 
     /**
@@ -310,7 +325,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withUserInfo($user, $password = null)
     {
-        return $this->with(['user' => $user, 'pass' => $password]);
+        return $this->with([self::USER => $user, self::PASS => $password]);
     }
 
     /**
@@ -327,7 +342,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withHost($host)
     {
-        return $this->with(['host' => $host]);
+        return $this->with([self::HOST => $host]);
     }
 
     /**
@@ -349,7 +364,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withPort($port)
     {
-        return $this->with(['port' => $port]);
+        return $this->with([self::PORT => $port]);
     }
 
     /**
@@ -376,7 +391,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withPath($path)
     {
-        return $this->with(['path' => $path]);
+        return $this->with([self::PATH => $path]);
     }
 
     /**
@@ -396,7 +411,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withQuery($query)
     {
-        return $this->with(['query' => $query]);
+        return $this->with([self::QUERY => $query]);
     }
 
     /**
@@ -415,7 +430,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withFragment($fragment)
     {
-        return $this->with(['fragment' => $fragment]);
+        return $this->with([self::FRAG => $fragment]);
     }
 
     /**

@@ -55,14 +55,4 @@ class UriFactoryTest extends \PHPUnit\Framework\TestCase
         $uri = $uri->withFragment('other');
         $this->assertEquals('other', $uri->getFragment());
     }
-
-    public function testOffsetUnset(): void
-    {
-        $this->markTestSkipped();
-    }
-
-    public function testOffsetSet(): void
-    {
-        $this->markTestSkipped();
-    }
 }

@@ -1,7 +1,8 @@
 <?php
+declare(strict_types=1);
+
 namespace FmLabs\Test\Uri;
 
-use FmLabs\Uri\Uri;
 use FmLabs\Uri\UriFactory;
 use FmLabs\Uri\UriNormalizer;
 
@@ -62,7 +63,7 @@ class UriNormalizerTest extends \PHPUnit\Framework\TestCase
         $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/test/?q=1#frag');
     }
 
-    public function testStaticCapitalizeEscapeSequences() : void
+    public function testStaticCapitalizeEscapeSequences(): void
     {
         $url = 'http://www.example.com/a%c2%b1b/';
         $expected = 'http://www.example.com/a%C2%B1b/';
@@ -81,7 +82,7 @@ class UriNormalizerTest extends \PHPUnit\Framework\TestCase
 
     public function testStaticDecodeUnreservedChars(): void
     {
-        $tests = array(
+        $tests = [
             '%41' => 'A',
             '%42' => 'B',
             '%5A' => 'Z',
@@ -94,7 +95,7 @@ class UriNormalizerTest extends \PHPUnit\Framework\TestCase
             '%2E' => chr(0x2E), // period
             '%5F' => chr(0x5F), // underscore
             '%7E' => chr(0x7E), // tilde
-        );
+        ];
 
         foreach ($tests as $encoded => $unencoded) {
             $this->assertEqual(UriNormalizer::decodeUnreservedChars($encoded), $unencoded);
@@ -103,12 +104,12 @@ class UriNormalizerTest extends \PHPUnit\Framework\TestCase
 
     public function testDecodePercentEncodedUnreservedCharacters(): void
     {
-        $tests = array(
+        $tests = [
             'http://www.example.com/%2Dusername/' => 'http://www.example.com/-username/',
             'http://www.example.com/%2Eusername/' => 'http://www.example.com/.username/',
             'http://www.example.com/%5Fusername/' => 'http://www.example.com/_username/',
-            'http://www.example.com/%7Eusername/' => 'http://www.example.com/~username/'
-        );
+            'http://www.example.com/%7Eusername/' => 'http://www.example.com/~username/',
+        ];
 
         foreach ($tests as $url => $expected) {
             $uri = UriFactory::fromString($url);

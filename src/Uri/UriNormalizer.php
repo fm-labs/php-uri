@@ -17,7 +17,7 @@ class UriNormalizer
      * @link http://en.wikipedia.org/wiki/Percent-encoding
      * @const string
      */
-    private const PERCENT_OCTET_REGEX = '|(\%[a-zA-Z0-9]{2})|';
+    protected const PERCENT_OCTET_REGEX = '|(\%[a-zA-Z0-9]{2})|';
 
     /**
      * @var array
