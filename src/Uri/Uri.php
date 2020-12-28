@@ -17,9 +17,10 @@ use Psr\Http\Message\UriInterface;
  * @property string $path
  * @property string $query
  * @property string $fragment
- * @property string $userinfo Composite subcomponent
- * @property string $hostinfo Composite subcomponent
- * @property string $authority Composite subcomponent
+ * @property string $userinfo
+ * @property string $hostinfo
+ * @property string $authority
+ * @property array $query_data
  */
 class Uri implements UriInterface, ArrayAccess
 {
@@ -63,7 +64,6 @@ class Uri implements UriInterface, ArrayAccess
                 $this->components[$key] = $val;
             }
         }
-        var_dump($this->components);
         if (isset($components['query'])) {
             parse_str($components['query'], $this->queryData);
         }
