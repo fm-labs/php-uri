@@ -1,5 +1,10 @@
 <?php
+declare(strict_types=1);
+
 namespace FmLabs\Uri;
+
+use ArrayAccess;
+use Psr\Http\Message\UriInterface;
 
 /**
  * Class Uri
@@ -12,155 +17,142 @@ namespace FmLabs\Uri;
  * @property string $path
  * @property string $query
  * @property string $fragment
- * @property string user_info Composite subcomponent
- * @property string host_info Composite subcomponent
- * @property string authority Composite subcomponent
+ * @property string $userinfo Composite subcomponent
+ * @property string $hostinfo Composite subcomponent
+ * @property string $authority Composite subcomponent
  */
-class Uri implements \Psr\Http\Message\UriInterface, \ArrayAccess {
-
+class Uri implements UriInterface, ArrayAccess
+{
     /**
      * @var array List of URI component names
      */
-    protected $components = ['scheme' => null, 'user' => null, 'pass' => null, 'host' => null, 'port' => null,
-        'path' => null, 'fragment' => null, 'query' => null];
+    protected $components = [
+        'scheme' => null, 'user' => null, 'pass' => null, 'host' => null, 'port' => null,
+        'path' => null, 'fragment' => null, 'query' => null,
+    ];
 
     /**
      * @var array
      */
-    protected $queryData = array();
+    protected $queryData = [];
 
     /**
-     * @param string $uri
+     * @param string $userinfo Userinfo URI component
+     * @return array|null[]
      */
-    public function __construct($uri = null)
+    public static function splitUserInfo(string $userinfo): array
     {
-        if (is_string($uri)) {
-            $components = $this->parse($uri);
-            $this->apply($components);
-        } elseif (is_array($uri)) {
-            $this->apply($uri);
-        } elseif ($uri instanceof self) {
-            $this->apply($uri->getComponents());
-        } elseif ($uri) {
-            throw new \InvalidArgumentException("Invalid URI input");
-        } else {
-            $this->apply([]);
+        $parts = explode(':', $userinfo);
+        switch (count($parts)) {
+            case 1:
+                return [$parts[0], null];
+            case 2:
+                return [$parts[0], $parts[1]];
+            default:
+                return [null, null];
+        }
+    }
+
+    /**
+     * @param array $components URI components
+     */
+    public function __construct(array $components = [])
+    {
+        foreach ($components as $key => $val) {
+            if (array_key_exists($key, $this->components)) {
+                $this->components[$key] = $val;
+            }
+        }
+        var_dump($this->components);
+        if (isset($components['query'])) {
+            parse_str($components['query'], $this->queryData);
         }
     }
 
     /**
      * Magic getter access to URI components
      *
-     * @param $key
+     * @param string $key Component key
      * @return array|mixed|string|null
      */
-    public function __get($key)
+    public function __get(string $key)
     {
         return $this->get($key);
     }
 
     /**
-     * {@inheritDoc}
+     * @param string $key Component key
+     * @return bool
      */
-    public function __toString()
-    {
-        return $this->toString();
-    }
-
-    protected function has($key)
+    protected function has(string $key)
     {
         return array_key_exists($key, $this->components)
-            || in_array($key, ['host_info', 'user_info', 'authority', 'query_data', 'url']);
-    }
-
-    protected function get($key)
-    {
-        if ($key == "authority") {
-            return $this->getAuthority();
-        } elseif ($key == "user_info") {
-            return $this->getUserInfo();
-        } elseif ($key == "host_info") {
-            return $this->getHostInfo();
-        } elseif ($key == "query_data") {
-            return $this->getQueryData();
-        } elseif ($key == "url") {
-            return $this->toString();
-        } elseif ($this->has($key)) {
-            return $this->components[$key];
-        }
-
-        return null;
+            || in_array($key, ['hostinfo', 'userinfo', 'authority', 'query_data', 'url']);
     }
 
     /**
-     * @param array $components
-     * @return $this
+     * @param string $key Component key
+     * @return array|mixed|string|null
      */
-    protected function apply(array $components)
+    protected function get(string $key)
     {
-        $components += ['scheme' => null, 'user' => null, 'pass' => null, 'host' => null, 'port' => null,
-            'path' => null, 'fragment' => null, 'query' => null];
-
-        $this->components = $components;
-
-        if (isset($components['query'])) {
-            parse_str($components['query'], $this->queryData);
+        switch ($key) {
+            case 'authority':
+                return $this->getAuthority();
+            case 'userinfo':
+                return $this->getUserInfo();
+            case 'hostinfo':
+                return $this->getHostInfo();
+            case 'query_data':
+                return $this->getQueryData();
         }
 
-        return $this;
+        return $this->components[$key] ?? null;
     }
 
     /**
-     * Parse URI components from string
-     *
-     * @param string $uriStr URI string
-     * @return array
+     * @return string
      */
-    protected function parse($uriStr)
-    {
-        $components = parse_url($uriStr);
-
-        return $components;
-    }
-
     public function getScheme()
     {
         return $this->scheme;
     }
 
+    /**
+     * @return string
+     */
     public function getHost()
     {
         return $this->host;
     }
 
+    /**
+     * @return int|string|null
+     */
     public function getPort()
     {
         return $this->port;
     }
 
+    /**
+     * @return string
+     */
     public function getPath()
     {
         return $this->path;
     }
 
+    /**
+     * @return string
+     */
     public function getQuery()
     {
         return $this->query;
     }
 
-    public function getQueryData($key = null)
-    {
-        if ($key === null) {
-            return $this->queryData;
-        }
-
-        if (isset($this->queryData[$key])) {
-            return $this->queryData[$key];
-        }
-
-        return null;
-    }
-
+    /**
+     * @return string
+     */
     public function getFragment()
     {
         return $this->fragment;
@@ -174,26 +166,15 @@ class Uri implements \Psr\Http\Message\UriInterface, \ArrayAccess {
      */
     public function getUserInfo()
     {
-        $info = "";
+        $info = '';
         if ($this->user && $this->pass) {
-            $info = $this->user . ":" . $this->pass;
+            $info = $this->user . ':' . $this->pass;
         } elseif ($this->user) {
             $info = $this->user;
         }
 
         return $info;
     }
-
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    public function getUserPass()
-    {
-        return $this->pass;
-    }
-
 
     /**
      * Returns the Authority URI component, consisting of the userinfo- and
@@ -203,9 +184,9 @@ class Uri implements \Psr\Http\Message\UriInterface, \ArrayAccess {
      */
     public function getAuthority()
     {
-        $auth = "";
+        $auth = '';
         if ($this->getUserInfo()) {
-            $auth .= $this->getUserInfo() . "@";
+            $auth .= $this->getUserInfo() . '@';
         }
 
         $auth .= $this->getHostInfo();
@@ -214,8 +195,44 @@ class Uri implements \Psr\Http\Message\UriInterface, \ArrayAccess {
     }
 
     /**
+     * Returns the URI components
+     *
+     * @return array
+     */
+    public function getComponents()
+    {
+        return [
+            'scheme' => $this->scheme,
+            'user' => $this->user,
+            'pass' => $this->pass,
+            'host' => $this->host,
+            'port' => $this->port,
+            'path' => $this->path,
+            'fragment' => $this->fragment,
+            'query' => $this->query,
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserPass()
+    {
+        return $this->pass;
+    }
+
+    /**
      * Returns the host subcomponent including optional port number,
      * in the format of `host[:port]
+     *
      * @return string
      */
     public function getHostInfo()
@@ -229,41 +246,30 @@ class Uri implements \Psr\Http\Message\UriInterface, \ArrayAccess {
     }
 
     /**
-     * Returns the URI components
-     *
-     * @return array
+     * @param null $key Query data key. If NULL, returns array of all query data.
+     * @return array|mixed|null
      */
-    public function getComponents()
+    public function getQueryData($key = null)
     {
-        return array(
-            'scheme' => $this->scheme,
-            'user' => $this->user,
-            'pass' => $this->pass,
-            'host' => $this->host,
-            'port' => $this->port,
-            'path' => $this->path,
-            'fragment' => $this->fragment,
-            'query' => $this->query,
-            '_authority' => $this->getAuthority(),
-            '_host_info' => $this->getHostInfo(),
-            '_user_info' => $this->getUserInfo(),
-            '_url' => $this->toString()
-        );
+        if ($key === null) {
+            return $this->queryData;
+        }
+
+        if (isset($this->queryData[$key])) {
+            return $this->queryData[$key];
+        }
+
+        return null;
     }
 
     /**
-     * @param string|array $key
-     * @param string|null $value
-     * @return Uri|\Psr\Http\Message\UriInterface
+     * @param array $components URI components
+     * @return \FmLabs\Uri\Uri|\Psr\Http\Message\UriInterface
      */
-    protected function with($key, $value = null)
+    protected function with(array $components): self
     {
-        $components = $this->getComponents();
-        if (is_array($key)) {
-            $components = array_merge($components, $key);
-        } else {
-            $components[$key] = $value;
-        }
+        $components = array_merge($this->components, $components);
+        var_dump($components);
 
         return new self($components);
     }
@@ -285,7 +291,7 @@ class Uri implements \Psr\Http\Message\UriInterface, \ArrayAccess {
      */
     public function withScheme($scheme)
     {
-        return $this->with('scheme', $scheme);
+        return $this->with(['scheme' => $scheme]);
     }
 
     /**
@@ -304,10 +310,7 @@ class Uri implements \Psr\Http\Message\UriInterface, \ArrayAccess {
      */
     public function withUserInfo($user, $password = null)
     {
-        return $this->with([
-            'user' => $user,
-            'pass' => $password
-        ]);
+        return $this->with(['user' => $user, 'pass' => $password]);
     }
 
     /**
@@ -324,7 +327,7 @@ class Uri implements \Psr\Http\Message\UriInterface, \ArrayAccess {
      */
     public function withHost($host)
     {
-        return $this->with('host', $host);
+        return $this->with(['host' => $host]);
     }
 
     /**
@@ -346,7 +349,7 @@ class Uri implements \Psr\Http\Message\UriInterface, \ArrayAccess {
      */
     public function withPort($port)
     {
-        return $this->with('port', $port);
+        return $this->with(['port' => $port]);
     }
 
     /**
@@ -373,7 +376,7 @@ class Uri implements \Psr\Http\Message\UriInterface, \ArrayAccess {
      */
     public function withPath($path)
     {
-        return $this->with('path', $path);
+        return $this->with(['path' => $path]);
     }
 
     /**
@@ -393,7 +396,7 @@ class Uri implements \Psr\Http\Message\UriInterface, \ArrayAccess {
      */
     public function withQuery($query)
     {
-        return $this->with('query', $query);
+        return $this->with(['query' => $query]);
     }
 
     /**
@@ -412,7 +415,7 @@ class Uri implements \Psr\Http\Message\UriInterface, \ArrayAccess {
      */
     public function withFragment($fragment)
     {
-        return $this->with('fragment', $fragment);
+        return $this->with(['fragment' => $fragment]);
     }
 
     /**
@@ -420,7 +423,7 @@ class Uri implements \Psr\Http\Message\UriInterface, \ArrayAccess {
      *
      * @return string
      */
-    public function toString()
+    public function __toString(): string
     {
         // scheme
         $scheme = $this->scheme;
@@ -453,18 +456,7 @@ class Uri implements \Psr\Http\Message\UriInterface, \ArrayAccess {
     }
 
     /**
-     * Returns URI components as array.
-     * Alias for `getComponents()`
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-        return $this->getComponents();
-    }
-
-    /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function offsetGet($offset)
     {
@@ -472,25 +464,26 @@ class Uri implements \Psr\Http\Message\UriInterface, \ArrayAccess {
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return $this->has($offset);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function offsetSet($offset, $value)
     {
-        // not supported
-        return;
+        throw new \RuntimeException('Uri object is read-only');
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function offsetUnset($offset)
     {
-        // not supported
-        return;
+        throw new \RuntimeException('Uri object is read-only');
     }
 }

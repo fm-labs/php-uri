@@ -2,83 +2,84 @@
 namespace FmLabs\Test\Uri;
 
 use FmLabs\Uri\Uri;
+use FmLabs\Uri\UriFactory;
 use FmLabs\Uri\UriNormalizer;
 
 class UriNormalizerTest extends \PHPUnit\Framework\TestCase
 {
-
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
     }
 
-    public function assertEqual($actual, $expected)
+    public function assertEqual($actual, $expected): void
     {
         $this->assertEquals($expected, $actual);
     }
 
-    public function testLowercaseScheme()
+    public function testLowercaseScheme(): void
     {
-        $uri = new Uri('HTTP://example.org/');
+        $uri = UriFactory::fromString('HTTP://example.org/');
         $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/');
     }
 
-    public function testLowercaseHost()
+    public function testLowercaseHost(): void
     {
-        $uri = new Uri('http://eXamPLE.oRg/');
+        $uri = UriFactory::fromString('http://eXamPLE.oRg/');
         $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/');
     }
 
-    public function testRemoveDefaultPorts()
+    public function testRemoveDefaultPorts(): void
     {
-        $uri = new Uri('http://example.org:80/');
+        $uri = UriFactory::fromString('http://example.org:80/');
         $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/');
 
-        $uri = new Uri('http://example.org:8080/');
+        $uri = UriFactory::fromString('http://example.org:8080/');
         $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org:8080/');
 
-        $uri = new Uri('https://example.org:443/');
+        $uri = UriFactory::fromString('https://example.org:443/');
         $this->assertEqual(UriNormalizer::normalize($uri), 'https://example.org/');
 
-        $uri = new Uri('https://example.org:9443/');
+        $uri = UriFactory::fromString('https://example.org:9443/');
         $this->assertEqual(UriNormalizer::normalize($uri), 'https://example.org:9443/');
     }
 
-    public function testAddTrailingSlash()
+    public function testAddTrailingSlash(): void
     {
-        $uri = new Uri('http://example.org/');
+        $uri = UriFactory::fromString('http://example.org/');
         $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/');
 
-        $uri = new Uri('http://example.org');
+        $uri = UriFactory::fromString('http://example.org');
         $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/');
 
-        $uri = new Uri('http://example.org/test');
+        $uri = UriFactory::fromString('http://example.org/test');
         $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/test/');
 
-        $uri = new Uri('http://example.org/test?q=1');
+        $uri = UriFactory::fromString('http://example.org/test?q=1');
         $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/test/?q=1');
 
-        $uri = new Uri('http://example.org/test?q=1#frag');
+        $uri = UriFactory::fromString('http://example.org/test?q=1#frag');
         $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/test/?q=1#frag');
     }
 
-    public function testStaticCapitalizeEscapeSequences() {
+    public function testStaticCapitalizeEscapeSequences() : void
+    {
         $url = 'http://www.example.com/a%c2%b1b/';
         $expected = 'http://www.example.com/a%C2%B1b/';
 
         $this->assertEqual(UriNormalizer::capitalizeEscapeSequences($url), $expected);
     }
 
-    public function testCapitalizeEscapeSequences()
+    public function testCapitalizeEscapeSequences(): void
     {
         $url = 'http://www.example.com/a%c2%b1b/';
         $expected = 'http://www.example.com/a%C2%B1b/';
 
-        $uri = new Uri($url);
+        $uri = UriFactory::fromString($url);
         $this->assertEqual(UriNormalizer::normalize($uri), $expected);
     }
 
-    public function testStaticDecodeUnreservedChars()
+    public function testStaticDecodeUnreservedChars(): void
     {
         $tests = array(
             '%41' => 'A',
@@ -100,7 +101,7 @@ class UriNormalizerTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    public function testDecodePercentEncodedUnreservedCharacters()
+    public function testDecodePercentEncodedUnreservedCharacters(): void
     {
         $tests = array(
             'http://www.example.com/%2Dusername/' => 'http://www.example.com/-username/',
@@ -109,25 +110,24 @@ class UriNormalizerTest extends \PHPUnit\Framework\TestCase
             'http://www.example.com/%7Eusername/' => 'http://www.example.com/~username/'
         );
 
-        foreach ($tests as $test => $expected) {
-            $uri = new Uri($test);
+        foreach ($tests as $url => $expected) {
+            $uri = UriFactory::fromString($url);
             $this->assertEqual(UriNormalizer::normalize($uri), $expected);
         }
     }
 
-    public function testRemoveDotSegments()
+    public function testRemoveDotSegments(): void
     {
         $this->markTestIncomplete('Implement all the dot segment removal methods and tests');
     }
 
-    public function testAllQueryNormalizations()
+    public function testAllQueryNormalizations(): void
     {
         $this->markTestIncomplete('Implement all the missing query normalization methods and tests');
     }
 
-    public function testAllSemanticChangesNormalizations()
+    public function testAllSemanticChangesNormalizations(): void
     {
         $this->markTestIncomplete('Implement all the missing semantic-changes methods and tests');
     }
-
 }

@@ -82,7 +82,7 @@ $frag = $uri->getFragment(); // "world"
 ### UriBuilder
 
 ```php
-$builder = new \FmLabs\Uri\UriBuilder();
+$builder = new \FmLabs\Uri\UriFactory();
 $builder
     ->setSchema('http')
     ->setHost('www.example.org')

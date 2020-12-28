@@ -1,7 +1,7 @@
 {
     "name": "fm-labs/php-uri",
     "description": "Simple URI library for PHP",
-    "license": "See LICENSE file",
+    "license": "MIT",
     "minimum-stability": "stable",
     "authors": [
         {
@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "php": "^7",
+        "php": "^7.1",
         "psr/http-message": "^1.0"
     },
     "require-dev": {
