@@ -12,15 +12,32 @@ Includes RFC3968-compliant URI normalizer.
 ## Installation
 
 ```console
-$ composer require fm-labs/php-uri ^0.4
+$ composer require fm-labs/php-uri
 ```
 
 ## Classes
 
 ### Uri
+```php
+// > Create new Uri
+$uri = \FmLabs\Uri\UriFactory::create();
+$uri = $uri
+    ->withScheme('https')
+    ->withHost('example.org')
+    ->withPort(8080)
+    ->withPath('/my/path')
+    ->withQuery('foo=bar&hello=world')
+    ->withFragment('top')
+    ->withUserInfo('user', 's3cret');
+
+echo (string)$uri;
+// https://user:s3cret@example.org:8080/my/path?foo=bar&hello=world#top
+```
 
 ```php
+// > Create Uri from string
 $uri = \FmLabs\Uri\UriFactory::fromString('http://user:s3cret@www.example.org/test?q=hello#world');
+
 // PSR-7 interface methods
 $schema = $uri->getScheme(); // "http"
 $host = $uri->getHost(); // "www.example.org"
@@ -33,13 +50,13 @@ $authority = $uri->getAuthority(); // "user:s3cret@www.example.org"
 $user = $uri->getUser(); // "user"
 $pass = $uri->getUserPass(); // "s3cret"
 $queryData = $uri->getQueryData(); // ['q' => 'hello']
+$queryData = $uri->getQueryData('q'); // 'hello'
 
 // Array access (read-only)
 $host = $uri['host'];
 
 // Property access (read-only)
 $host = $uri->host;
-
 ```
 
 #### PSR-7 UriInterface methods
@@ -72,6 +89,7 @@ $host = $uri->host;
 
 
 #### Array and Property Access
+
 Available Keys: 
 `scheme`, `host`, `port`, `path`, `query`, `fragment`, `user`, `pass`, `userinfo`, `authority`, `hostinfo`, `querydata`
 
@@ -90,7 +108,17 @@ $uri->KEY_NAME;
 
 ### UriFactory
 
-Create Uri object from UriFactory
+Create Uri object with UriFactory class
+
+#### `UriFactory::create()`
+```php
+// Examples
+$uri = \FmLabs\Uri\UriFactory::create();
+$uri = $uri
+    ->withScheme('https')
+    ->withHost('example.org');
+```
+
 
 #### `UriFactory::fromString(string $uriString)`
 ```php
@@ -115,6 +143,11 @@ Create Uri object from UriFactory
 
 #### `UriFactory::fromUri(UriInterface $uri)`
 Create `\FmLabs\Uri\Uri` object from any `UriInterface`. 
+
+```php
+/** @var \Psr\Http\Message\UriInterface $anyObjectThatImplementsUriInterface */
+$uri = \FmLabs\Uri\UriFactory::fromUri($anyObjectThatImplementsUriInterface);
+```
 
 ### UriNormalizer
 
