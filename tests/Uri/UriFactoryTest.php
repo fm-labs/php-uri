@@ -9,11 +9,33 @@ use Psr\Http\Message\UriInterface;
 
 class UriFactoryTest extends \PHPUnit\Framework\TestCase
 {
-    public function testFromString(): void
+    public function setUp(): void
     {
-        $uri = UriFactory::fromString('https://user:secret@www.example.org:1234/my/path?some=query&foo=bar#frag');
+        parent::setUp();
+
+        UriFactory::setClassName(Uri::class);
+    }
+
+    public function testStaticSetClassName(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        UriFactory::setClassName('\\Invalid\\Class\\Path');
+    }
+
+    public function testStaticCreate(): void
+    {
+        $uri = UriFactory::create();
         $this->assertInstanceOf(UriInterface::class, $uri);
         $this->assertInstanceOf(Uri::class, $uri);
+
+        $this->expectException(\RuntimeException::class);
+        UriFactory::setClassName(\stdClass::class);
+        UriFactory::create();
+    }
+
+    public function testStaticFromString(): void
+    {
+        $uri = UriFactory::fromString('https://user:secret@www.example.org:1234/my/path?some=query&foo=bar#frag');
         $this->assertEquals('https', $uri->getScheme());
         $this->assertEquals('user:secret', $uri->getUserInfo());
         $this->assertEquals('www.example.org', $uri->getHost());
@@ -23,7 +45,7 @@ class UriFactoryTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('frag', $uri->getFragment());
     }
 
-    public function testFromUri(): void
+    public function testStaticFromUri(): void
     {
         $tmp = UriFactory::fromString('https://user:secret@www.example.org:1234/my/path?some=query&foo=bar#frag');
         $uri = UriFactory::fromUri($tmp);
