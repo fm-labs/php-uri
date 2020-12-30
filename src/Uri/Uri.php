@@ -68,8 +68,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     protected function has(string $key)
     {
-        return isset($this->{$key})
-            || in_array($key, [self::AUTHORITY, self::HOSTINFO, self::USERINFO, self::QUERYDATA]);
+        return $this->get($key) !== null;
     }
 
     /**
@@ -251,6 +250,7 @@ class Uri implements UriInterface, ArrayAccess
             $clone->{$property} = $val;
 
             if ($property == 'query') {
+                $clone->queryData = [];
                 parse_str($val, $clone->queryData);
             }
         }
@@ -460,7 +460,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        throw new \RuntimeException('Uri object is read-only');
+        throw new \RuntimeException('Unable to set Uri component. Uri object is read-only.');
     }
 
     /**
@@ -468,6 +468,6 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function offsetUnset($offset)
     {
-        throw new \RuntimeException('Uri object is read-only');
+        throw new \RuntimeException('Unable to unset Uri component. Uri object is read-only.');
     }
 }
