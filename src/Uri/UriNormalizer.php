@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace FmLabs\Uri;
 
+use Psr\Http\Message\UriInterface;
+
 /**
  * UriNormalizer
  *
@@ -28,67 +30,256 @@ class UriNormalizer
     ];
 
     /**
-     * Normalize Uri
-     *
-     * @param \FmLabs\Uri\Uri|\Psr\Http\Message\UriInterface $uri URI object
-     * @param array $options Normalization options
-     * @return \FmLabs\Uri\Uri
+     * @var \Psr\Http\Message\UriInterface
      */
-    public static function normalize(Uri $uri, array $options = [])
-    {
-        /*
-         * PRESERVE SEMANTICS
-         */
+    private $uri;
 
-        // Converting the scheme and host to lower case
+    /**
+     * @var array
+     */
+    private $options;
+
+    /**
+     * UriNormalizer constructor.
+     *
+     * @param \Psr\Http\Message\UriInterface $uri Uri object
+     * @param array $options
+     */
+    public function __construct(UriInterface $uri, array $options = [])
+    {
+        $this->uri = $uri;
+    }
+
+    /**
+     * @return \Psr\Http\Message\UriInterface
+     */
+    public function getUri(): UriInterface
+    {
+        return $this->uri;
+    }
+
+    /**
+     * Converting the scheme and host to lower case.
+     *
+     * @return $this
+     */
+    public function normalizeScheme()
+    {
+        $uri = &$this->uri;
         if ($uri->getScheme()) {
             $uri = $uri->withScheme(strtolower($uri->getScheme()));
         }
+
+        return $this;
+    }
+
+    /**
+     * Converting the scheme and host to lower case.
+     *
+     * @return $this
+     */
+    public function normalizeHost()
+    {
+        $uri = &$this->uri;
         if ($uri->getHost()) {
             $uri = $uri->withHost(strtolower($uri->getHost()));
         }
 
-        if ($uri->getPath()) {
-            $normPath = $uri->getPath();
+        return $this;
+    }
 
-            // Capitalizing letters in escape sequences
-            $normPath = self::capitalizeEscapeSequences($normPath);
+    /**
+     * @return $this
+     */
+    public function normalizeDotSegements()
+    {
+        $uri = &$this->uri;
+        //@TODO Implement me
+        return $this;
+    }
 
-            // Decoding percent-encoded octets of unreserved characters
-            $normPath = self::decodeUnreservedChars($normPath);
-
-            $uri = $uri->withPath($normPath);
-        }
-
-        // Removing default ports
-        if ($uri->getScheme() && isset(self::$defaultPorts[$uri->getScheme()])) {
-            if ($uri->getPort() && $uri->getPort() == self::$defaultPorts[$uri->getScheme()]) {
-                $uri = $uri->withPort(null);
-            }
-        }
-
-        // Add trailing slash
+    /**
+     * @return $this
+     */
+    public function normalizeTrailingSlash()
+    {
+        $uri = &$this->uri;
         if (!$uri->getPath()) {
             $uri = $uri->withPath('/');
         } elseif (substr($uri->getPath(), -1) != '/') {
             $uri = $uri->withPath($uri->getPath() . '/');
         }
 
-        // @todo Removing dot-segments
+        return $this;
+    }
 
-        /*
-         * CHANGE SEMANTICS
-         */
+    /**
+     * @return $this
+     */
+    public function normalizeNonEmptyPath()
+    {
+        $uri = &$this->uri;
+        //@TODO Implement me
+        return $this;
+    }
 
-        // @todo Removing directory index
-        // @todo Removing the fragment
-        // @todo Replacing IP with domain name
-        // @todo Limiting protocols
-        // @todo Removing duplicate slashes
-        // @todo Removing or adding “www” as the first domain label
-        // @todo Sorting the query parameters
-        // @todo Removing unused query variables
-        // @todo Removing the "?" when the query is empty
+    /**
+     * @return $this
+     */
+    public function normalizeUnreservedChars()
+    {
+        $uri = &$this->uri;
+        if ($uri->getPath()) {
+            $uri = $uri->withPath(self::decodeUnreservedChars($uri->getPath()));
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function normalizeEscapeSequences()
+    {
+        $uri = &$this->uri;
+        if ($uri->getPath()) {
+            $uri = $uri->withPath(self::capitalizeEscapeSequences($uri->getPath()));
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function normalizeDefaultPorts()
+    {
+        $uri = &$this->uri;
+        if ($uri->getScheme() && isset(self::$defaultPorts[$uri->getScheme()])) {
+            if ($uri->getPort() && $uri->getPort() == self::$defaultPorts[$uri->getScheme()]) {
+                $uri = $uri->withPort(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function normalizeFragment()
+    {
+        $uri = &$this->uri;
+        //@TODO Implement me
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function normalizeProtocols()
+    {
+        $uri = &$this->uri;
+        //@TODO Implement me
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function normalizeHostIp()
+    {
+        $uri = &$this->uri;
+        //@TODO Implement me
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function normalizeDirectoryIndex()
+    {
+        $uri = &$this->uri;
+        //@TODO Implement me
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function normalizeDuplicateSlashes()
+    {
+        $uri = &$this->uri;
+        //@TODO Implement me
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function normalizeWwwDomain()
+    {
+        $uri = &$this->uri;
+        //@TODO Implement me
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function normalizeQuerySorting()
+    {
+        $uri = &$this->uri;
+        //@TODO Implement me
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function normalizeEmptyQuery()
+    {
+        $uri = &$this->uri;
+        //@TODO Implement me
+        return $this;
+    }
+
+    /**
+     * Normalize Uri
+     *
+     * @param \FmLabs\Uri\Uri|\Psr\Http\Message\UriInterface $uri URI object
+     * @param array $options Normalization options
+     * @return \FmLabs\Uri\Uri|\Psr\Http\Message\UriInterface
+     */
+    public static function normalize(Uri $uri, array $options = []): UriInterface
+    {
+        $normalizer = new self($uri, $options);
+        // preserve semantics
+        $uri = $normalizer
+            ->normalizeProtocols()
+            ->normalizeScheme()
+            ->normalizeHost()
+            ->normalizeDefaultPorts()
+            ->normalizeDotSegements()
+            ->normalizeEscapeSequences()
+            ->normalizeUnreservedChars()
+            ->normalizeTrailingSlash()
+            ->getUri();
+
+        // change semantics
+        $preserve = $options['preserve'] ?? true;
+        if ($preserve === false) {
+            $uri = $normalizer
+                ->normalizeHostIp()
+                ->normalizeWwwDomain()
+                ->normalizeDirectoryIndex()
+                ->normalizeDuplicateSlashes()
+                ->normalizeNonEmptyPath()
+                ->normalizeQuerySorting()
+                ->normalizeFragment()
+                ->normalizeEmptyQuery()
+                ->getUri();
+        }
 
         return $uri;
     }
@@ -143,5 +334,21 @@ class UriNormalizer
         }, $string);
 
         return $string;
+    }
+
+    /**
+     * RFC 3986 / Section 5.2.4. Remove Dot Segments.
+     * Dot-segments `.` and `..` in the path component of the URI should be removed by applying
+     * the remove_dot_segments algorithm to the path described in RFC 3986.
+     * Example: http://example.com/foo/./bar/baz/../qux → http://example.com/foo/bar/qux
+     *
+     * @link https://tools.ietf.org/html/rfc3986#section-5.2.4
+     * @param string $path URI component
+     * @return string
+     */
+    public static function removeDotSegments(string $path): string
+    {
+        // @TODO Implement me
+        return $path;
     }
 }

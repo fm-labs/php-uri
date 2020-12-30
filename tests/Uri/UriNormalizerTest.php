@@ -1,83 +1,180 @@
 <?php
-declare(strict_types=1);
 
 namespace FmLabs\Test\Uri;
 
 use FmLabs\Uri\UriFactory;
 use FmLabs\Uri\UriNormalizer;
+use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\UriInterface;
 
-class UriNormalizerTest extends \PHPUnit\Framework\TestCase
+class UriNormalizerTest extends TestCase
 {
-    public function setUp(): void
+    public function testGetUri(): void
     {
-        parent::setUp();
+        $normalizer = new UriNormalizer(UriFactory::fromString('http://eXample.org'));
+        $this->assertInstanceOf(UriInterface::class, $normalizer->getUri());
+        $this->assertEquals('http://eXample.org', $normalizer->getUri());
     }
 
-    public function assertEqual($actual, $expected): void
-    {
-        $this->assertEquals($expected, $actual);
-    }
-
-    public function testLowercaseScheme(): void
+    public function testNormalizeScheme(): void
     {
         $uri = UriFactory::fromString('HTTP://example.org/');
-        $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/');
+        $this->assertEquals('http://example.org/', UriNormalizer::normalize($uri));
+
+        // with normalizer instance
+        $uri = UriFactory::fromString('HTTP://example.org/');
+        $normalized = (new UriNormalizer($uri))
+            ->normalizeScheme()
+            ->getUri();
+        $this->assertEquals('http://example.org/', $normalized);
     }
 
-    public function testLowercaseHost(): void
+    public function testNormalizeHost(): void
     {
         $uri = UriFactory::fromString('http://eXamPLE.oRg/');
-        $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/');
+        $this->assertEquals('http://example.org/', UriNormalizer::normalize($uri));
+
+        // with normalizer instance
+        $uri = UriFactory::fromString('http://eXamPLE.oRg/');
+        $normalized = (new UriNormalizer($uri))
+            ->normalizeHost()
+            ->getUri();
+        $this->assertEquals('http://example.org/', $normalized);
     }
 
-    public function testRemoveDefaultPorts(): void
+    public function testNormalizeDefaultPorts(): void
     {
         $uri = UriFactory::fromString('http://example.org:80/');
-        $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/');
+        $this->assertEquals('http://example.org/', UriNormalizer::normalize($uri));
 
         $uri = UriFactory::fromString('http://example.org:8080/');
-        $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org:8080/');
+        $this->assertEquals('http://example.org:8080/', UriNormalizer::normalize($uri));
 
         $uri = UriFactory::fromString('https://example.org:443/');
-        $this->assertEqual(UriNormalizer::normalize($uri), 'https://example.org/');
+        $this->assertEquals('https://example.org/', UriNormalizer::normalize($uri));
 
         $uri = UriFactory::fromString('https://example.org:9443/');
-        $this->assertEqual(UriNormalizer::normalize($uri), 'https://example.org:9443/');
+        $this->assertEquals('https://example.org:9443/', UriNormalizer::normalize($uri));
+
+        // with normalizer instance
+        $uri = UriFactory::fromString('http://example.org:80/');
+        $normalized = (new UriNormalizer($uri))
+            ->normalizeDefaultPorts()
+            ->getUri();
+        $this->assertEquals('http://example.org/', $normalized);
     }
 
-    public function testAddTrailingSlash(): void
+    public function testNormalizeTrailingSlash(): void
     {
         $uri = UriFactory::fromString('http://example.org/');
-        $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/');
+        $this->assertEquals('http://example.org/', UriNormalizer::normalize($uri));
 
         $uri = UriFactory::fromString('http://example.org');
-        $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/');
+        $this->assertEquals('http://example.org/', UriNormalizer::normalize($uri));
 
         $uri = UriFactory::fromString('http://example.org/test');
-        $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/test/');
+        $this->assertEquals('http://example.org/test/', UriNormalizer::normalize($uri));
 
         $uri = UriFactory::fromString('http://example.org/test?q=1');
-        $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/test/?q=1');
+        $this->assertEquals('http://example.org/test/?q=1', UriNormalizer::normalize($uri));
 
         $uri = UriFactory::fromString('http://example.org/test?q=1#frag');
-        $this->assertEqual(UriNormalizer::normalize($uri), 'http://example.org/test/?q=1#frag');
+        $this->assertEquals('http://example.org/test/?q=1#frag', UriNormalizer::normalize($uri));
+
+        // with normalizer instance
+        $uri = UriFactory::fromString('http://example.org/test?q=1#frag');
+        $normalized = (new UriNormalizer($uri))
+            ->normalizeTrailingSlash()
+            ->getUri();
+        $this->assertEquals('http://example.org/test/?q=1#frag', $normalized);
     }
 
-    public function testStaticCapitalizeEscapeSequences(): void
+    public function testNormalizeUnreservedChars(): void
     {
-        $url = 'http://www.example.com/a%c2%b1b/';
-        $expected = 'http://www.example.com/a%C2%B1b/';
+        $tests = [
+            'http://www.example.com/%2Dusername/' => 'http://www.example.com/-username/',
+            'http://www.example.com/%2Eusername/' => 'http://www.example.com/.username/',
+            'http://www.example.com/%5Fusername/' => 'http://www.example.com/_username/',
+            'http://www.example.com/%7Eusername/' => 'http://www.example.com/~username/',
+        ];
 
-        $this->assertEqual(UriNormalizer::capitalizeEscapeSequences($url), $expected);
+        foreach ($tests as $url => $expected) {
+            $uri = UriFactory::fromString($url);
+            $this->assertEquals($expected, UriNormalizer::normalize($uri));
+        }
+
+        // with normalizer instance
+        $uri = UriFactory::fromString('http://www.example.com/%7Eusername/');
+        $normalized = (new UriNormalizer($uri))
+            ->normalizeUnreservedChars()
+            ->getUri();
+        $this->assertEquals('http://www.example.com/~username/', $normalized);
     }
 
-    public function testCapitalizeEscapeSequences(): void
+    public function testNormalizeEscapeSequences(): void
     {
         $url = 'http://www.example.com/a%c2%b1b/';
         $expected = 'http://www.example.com/a%C2%B1b/';
 
         $uri = UriFactory::fromString($url);
-        $this->assertEqual(UriNormalizer::normalize($uri), $expected);
+        $this->assertEquals($expected, UriNormalizer::normalize($uri));
+
+        // with normalizer instance
+        $uri = UriFactory::fromString($url);
+        $normalized = (new UriNormalizer($uri))
+            ->normalizeEscapeSequences()
+            ->getUri();
+        $this->assertEquals($expected, $normalized);
+    }
+
+    public function testNormalizeProtocols(): void
+    {
+        $this->markTestIncomplete();
+    }
+
+    public function testNormalizeFragment(): void
+    {
+        $this->markTestIncomplete();
+    }
+
+    public function testNormalizeQuerySorting(): void
+    {
+        $this->markTestIncomplete();
+    }
+
+    public function testNormalizeNonEmptyPath(): void
+    {
+        $this->markTestIncomplete();
+    }
+
+    public function testNormalizeDirectoryIndex(): void
+    {
+        $this->markTestIncomplete();
+    }
+
+    public function testNormalizeDuplicateSlashes(): void
+    {
+        $this->markTestIncomplete();
+    }
+
+    public function testNormalizeHostIp(): void
+    {
+        $this->markTestIncomplete();
+    }
+
+    public function testNormalizeWwwDomain(): void
+    {
+        $this->markTestIncomplete();
+    }
+
+    public function testNormalizeEmptyQuery(): void
+    {
+        $this->markTestIncomplete();
+    }
+
+    public function testNormalizeDotSegements(): void
+    {
+        $this->markTestIncomplete();
     }
 
     public function testStaticDecodeUnreservedChars(): void
@@ -98,37 +195,41 @@ class UriNormalizerTest extends \PHPUnit\Framework\TestCase
         ];
 
         foreach ($tests as $encoded => $unencoded) {
-            $this->assertEqual(UriNormalizer::decodeUnreservedChars($encoded), $unencoded);
+            $this->assertEquals($unencoded, UriNormalizer::decodeUnreservedChars($encoded));
         }
     }
 
-    public function testDecodePercentEncodedUnreservedCharacters(): void
+    public function testStaticCapitalizeEscapeSequences(): void
     {
-        $tests = [
-            'http://www.example.com/%2Dusername/' => 'http://www.example.com/-username/',
-            'http://www.example.com/%2Eusername/' => 'http://www.example.com/.username/',
-            'http://www.example.com/%5Fusername/' => 'http://www.example.com/_username/',
-            'http://www.example.com/%7Eusername/' => 'http://www.example.com/~username/',
-        ];
+        $path = '/a%c2%b1b/';
+        $expected = '/a%C2%B1b/';
 
-        foreach ($tests as $url => $expected) {
-            $uri = UriFactory::fromString($url);
-            $this->assertEqual(UriNormalizer::normalize($uri), $expected);
-        }
+        $this->assertEquals($expected, UriNormalizer::capitalizeEscapeSequences($path));
     }
 
-    public function testRemoveDotSegments(): void
+    public function testStaticRemoveDotSegments(): void
     {
-        $this->markTestIncomplete('Implement all the dot segment removal methods and tests');
+        $this->markTestIncomplete();
     }
 
-    public function testAllQueryNormalizations(): void
+    public function testStaticNormalize(): void
     {
-        $this->markTestIncomplete('Implement all the missing query normalization methods and tests');
+        $this->markTestIncomplete();
     }
 
-    public function testAllSemanticChangesNormalizations(): void
+
+    public function testStaticWithAllNormalizations(): void
     {
-        $this->markTestIncomplete('Implement all the missing semantic-changes methods and tests');
+        $this->markTestIncomplete('Implement all the missing normalization methods and tests');
+    }
+
+    public function testStaticWithPreservedSemantics(): void
+    {
+        $this->markTestIncomplete('Implement all the missing semantic-preserving methods and tests');
+    }
+
+    public function testStaticWithChangedSemantics(): void
+    {
+        $this->markTestIncomplete('Implement all the missing semantic-changing methods and tests');
     }
 }
