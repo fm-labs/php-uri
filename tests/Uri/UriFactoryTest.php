@@ -3,56 +3,38 @@ declare(strict_types=1);
 
 namespace FmLabs\Test\Uri;
 
+use FmLabs\Uri\Uri;
 use FmLabs\Uri\UriFactory;
+use Psr\Http\Message\UriInterface;
 
 class UriFactoryTest extends \PHPUnit\Framework\TestCase
 {
-    public function testWithScheme(): void
+    public function testFromString(): void
     {
-        $uri = UriFactory::fromString('https://user:secret@www.example.org/my/path?some=query#frag');
-        $uri = $uri->withScheme('http');
-        $this->assertEquals('http', $uri->getScheme());
+        $uri = UriFactory::fromString('https://user:secret@www.example.org:1234/my/path?some=query&foo=bar#frag');
+        $this->assertInstanceOf(UriInterface::class, $uri);
+        $this->assertInstanceOf(Uri::class, $uri);
+        $this->assertEquals('https', $uri->getScheme());
+        $this->assertEquals('user:secret', $uri->getUserInfo());
+        $this->assertEquals('www.example.org', $uri->getHost());
+        $this->assertEquals('1234', $uri->getPort());
+        $this->assertEquals('/my/path', $uri->getPath());
+        $this->assertEquals('some=query&foo=bar', $uri->getQuery());
+        $this->assertEquals('frag', $uri->getFragment());
     }
 
-    public function testWithUserInfo(): void
+    public function testFromUri(): void
     {
-        $uri = UriFactory::fromString('https://user:secret@www.example.org/my/path?some=query#frag');
-        $uri = $uri->withUserInfo('admin', 'somepass');
-        $this->assertEquals('admin:somepass', $uri->getUserInfo());
-    }
-
-    public function testWithHost(): void
-    {
-        $uri = UriFactory::fromString('https://user:secret@www.example.org/my/path?some=query#frag');
-        $uri = $uri->withHost('example.net');
-        $this->assertEquals('example.net', $uri->getHost());
-    }
-
-    public function testWithPort(): void
-    {
-        $uri = UriFactory::fromString('https://user:secret@www.example.org/my/path?some=query#frag');
-        $uri = $uri->withPort(8080);
-        $this->assertEquals('8080', $uri->getPort());
-    }
-
-    public function testWithPath(): void
-    {
-        $uri = UriFactory::fromString('https://user:secret@www.example.org/my/path?some=query#frag');
-        $uri = $uri->withPath('/foo/bar');
-        $this->assertEquals('/foo/bar', $uri->getPath());
-    }
-
-    public function testWithQuery(): void
-    {
-        $uri = UriFactory::fromString('https://user:secret@www.example.org/my/path?some=query#frag');
-        $uri = $uri->withQuery('foo=bar&a=b');
-        $this->assertEquals('foo=bar&a=b', $uri->getQuery());
-    }
-
-    public function testWithFragment(): void
-    {
-        $uri = UriFactory::fromString('https://user:secret@www.example.org/my/path?some=query#frag');
-        $uri = $uri->withFragment('other');
-        $this->assertEquals('other', $uri->getFragment());
+        $tmp = UriFactory::fromString('https://user:secret@www.example.org:1234/my/path?some=query&foo=bar#frag');
+        $uri = UriFactory::fromUri($tmp);
+        $this->assertInstanceOf(UriInterface::class, $uri);
+        $this->assertInstanceOf(Uri::class, $uri);
+        $this->assertEquals($tmp->getScheme(), $uri->getScheme());
+        $this->assertEquals($tmp->getUserInfo(), $uri->getUserInfo());
+        $this->assertEquals($tmp->getHost(), $uri->getHost());
+        $this->assertEquals($tmp->getPort(), $uri->getPort());
+        $this->assertEquals($tmp->getPath(), $uri->getPath());
+        $this->assertEquals($tmp->getQuery(), $uri->getQuery());
+        $this->assertEquals($tmp->getFragment(), $uri->getFragment());
     }
 }
