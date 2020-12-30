@@ -155,14 +155,22 @@ $ ./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/
 - UriNormalizer: normalize: Removing the "?" when the query is empty
 
 ## Changelog
+[0.5]
+- Changed Uri class: Removed constructor
+- Changed Uri class: Implemented etter method to create new modified instances
+- Changed Uri class: Use class properties instead of property array
+- Added PHP8 annotations
+- Added TravisCI build targets php7.4 & php8.0
+- Added Tests support for PHPUnit9
+
 [0.4]
 - Dropped UriBuilder in favor of UriFactory
 - Added UriFactory  
 - Changed Uri constructor
 - Changed PHP language level to 7.1
 - Changed license to MIT license
-- Tests: Upgraded to PHPUnit8
-- Code style fixes
+- Added: Tests support for PHPUnit8
+- Fixed: Code style
 
 [0.3.1]
 - Added PSR-7 compatibility. Uri now implements PSR UriInterface
