@@ -9,14 +9,6 @@ use Psr\Http\Message\UriInterface;
 /**
  * Class Uri
  *
- * @property string $scheme
- * @property string $user
- * @property string $pass
- * @property string $host
- * @property string $port
- * @property string $path
- * @property string $query
- * @property string $fragment
  * @property string $userinfo
  * @property string $hostinfo
  * @property string $authority
@@ -24,33 +16,18 @@ use Psr\Http\Message\UriInterface;
  */
 class Uri implements UriInterface, ArrayAccess
 {
-    protected const SCHEME = 'scheme';
-    protected const USER = 'user';
-    protected const PASS = 'pass';
-    protected const HOST = 'host';
-    protected const PORT = 'port';
-    protected const PATH = 'path';
-    protected const FRAG = 'fragment';
-    protected const QUERY = 'query';
-
     protected const HOSTINFO = 'hostinfo';
     protected const USERINFO = 'userinfo';
     protected const AUTHORITY = 'authority';
     protected const QUERYDATA = 'querydata';
 
-    /**
-     * @var array List of URI component names
-     */
-    protected $components = [
-        self::SCHEME => null,
-        self::USER => null,
-        self::PASS => null,
-        self::HOST => null,
-        self::PORT => null,
-        self::PATH => null,
-        self::FRAG => null,
-        self::QUERY => null,
-    ];
+    protected $scheme;
+    protected $user;
+    protected $pass;
+    protected $host;
+    protected $port;
+    protected $path;
+    protected $fragment;
 
     /**
      * @var array
@@ -75,21 +52,6 @@ class Uri implements UriInterface, ArrayAccess
     }
 
     /**
-     * @param array $components URI components
-     */
-    public function __construct(array $components = [])
-    {
-        foreach ($components as $key => $val) {
-            if (array_key_exists($key, $this->components)) {
-                $this->components[$key] = $val;
-            }
-        }
-        if (isset($components[self::QUERY])) {
-            parse_str($components[self::QUERY], $this->queryData);
-        }
-    }
-
-    /**
      * Magic getter access to URI components
      *
      * @param string $key Component key
@@ -106,7 +68,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     protected function has(string $key)
     {
-        return array_key_exists($key, $this->components)
+        return isset($this->{$key})
             || in_array($key, [self::AUTHORITY, self::HOSTINFO, self::USERINFO, self::QUERYDATA]);
     }
 
@@ -127,7 +89,7 @@ class Uri implements UriInterface, ArrayAccess
                 return $this->getQueryData();
         }
 
-        return $this->components[$key] ?? null;
+        return $this->{$key} ?? null;
     }
 
     /**
@@ -135,7 +97,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getScheme()
     {
-        return $this->components[self::SCHEME];
+        return $this->scheme;
     }
 
     /**
@@ -143,7 +105,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getHost()
     {
-        return $this->components[self::HOST];
+        return $this->host;
     }
 
     /**
@@ -151,7 +113,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getPort()
     {
-        return $this->components[self::PORT];
+        return $this->port;
     }
 
     /**
@@ -159,7 +121,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getPath()
     {
-        return $this->components[self::PATH];
+        return $this->path;
     }
 
     /**
@@ -167,7 +129,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getQuery()
     {
-        return $this->components[self::QUERY];
+        return $this->query;
     }
 
     /**
@@ -175,7 +137,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getFragment()
     {
-        return $this->components[self::FRAG];
+        return $this->fragment;
     }
 
     /**
@@ -222,14 +184,14 @@ class Uri implements UriInterface, ArrayAccess
     public function getComponents()
     {
         return [
-            self::SCHEME => $this->scheme,
-            self::USER => $this->user,
-            self::PASS => $this->pass,
-            self::HOST => $this->host,
-            self::PORT => $this->port,
-            self::PATH => $this->path,
-            self::FRAG => $this->fragment,
-            self::QUERY => $this->query,
+            'scheme' => $this->scheme,
+            'user' => $this->user,
+            'pass' => $this->pass,
+            'host' => $this->host,
+            'port' => $this->port,
+            'path' => $this->path,
+            'fragment' => $this->fragment,
+            'query' => $this->query,
         ];
     }
 
@@ -238,7 +200,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getUser()
     {
-        return $this->components[self::USER];
+        return $this->user;
     }
 
     /**
@@ -246,7 +208,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getUserPass()
     {
-        return $this->components[self::PASS];
+        return $this->pass;
     }
 
     /**
@@ -277,18 +239,25 @@ class Uri implements UriInterface, ArrayAccess
 
         return $this->queryData[$key] ?? null;
     }
-
+    
     /**
      * @param array $components URI components
      * @return \FmLabs\Uri\Uri|\Psr\Http\Message\UriInterface
      */
-    protected function with(array $components): self
+    public function with(array $components)
     {
-        $components = array_merge($this->components, $components);
+        $clone = clone $this;
+        foreach ($components as $property => $val) {
+            $clone->{$property} = $val;
 
-        return new self($components);
+            if ($property == 'query') {
+                parse_str($val, $clone->queryData);
+            }
+        }
+
+        return $clone;
     }
-
+    
     /**
      * Return an instance with the specified scheme.
      *
@@ -306,7 +275,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withScheme($scheme)
     {
-        return $this->with([self::SCHEME => $scheme]);
+        return $this->with(['scheme' => $scheme]);
     }
 
     /**
@@ -325,7 +294,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withUserInfo($user, $password = null)
     {
-        return $this->with([self::USER => $user, self::PASS => $password]);
+        return $this->with(['user' => $user, 'pass' => $password]);
     }
 
     /**
@@ -342,7 +311,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withHost($host)
     {
-        return $this->with([self::HOST => $host]);
+        return $this->with(['host' => $host]);
     }
 
     /**
@@ -364,7 +333,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withPort($port)
     {
-        return $this->with([self::PORT => $port]);
+        return $this->with(['port' => $port]);
     }
 
     /**
@@ -391,7 +360,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withPath($path)
     {
-        return $this->with([self::PATH => $path]);
+        return $this->with(['path' => $path]);
     }
 
     /**
@@ -411,7 +380,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withQuery($query)
     {
-        return $this->with([self::QUERY => $query]);
+        return $this->with(['query' => $query]);
     }
 
     /**
@@ -430,7 +399,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withFragment($fragment)
     {
-        return $this->with([self::FRAG => $fragment]);
+        return $this->with(['fragment' => $fragment]);
     }
 
     /**

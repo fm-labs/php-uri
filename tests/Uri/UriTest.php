@@ -231,7 +231,8 @@ class UriTest extends \PHPUnit\Framework\TestCase
 
     public function testOffsetExists(): void
     {
-        $uri = UriFactory::fromString('https://foo:bar@example.org');
+        $url = 'https://john.doe:secret@www.example.com:123/forum/questions/?tag=networking&order=newest#top';
+        $uri = UriFactory::fromString($url);
         $this->assertTrue(isset($uri['scheme']));
         $this->assertTrue(isset($uri['user']));
         $this->assertTrue(isset($uri['pass']));

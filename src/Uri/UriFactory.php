@@ -16,7 +16,8 @@ class UriFactory
      */
     public static function fromComponents(array $components): UriInterface
     {
-        return new Uri($components);
+        return (new Uri())
+            ->with($components);
     }
 
     /**
@@ -48,6 +49,6 @@ class UriFactory
             'query' => $uri->getQuery(),
         ];
 
-        return new Uri($components);
+        return self::fromComponents($components);
     }
 }
