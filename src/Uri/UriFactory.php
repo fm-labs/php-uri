@@ -37,16 +37,14 @@ class UriFactory
     {
         [$user, $pass] = Uri::splitUserInfo($uri->getUserInfo());
         $components = [
-            //'authority' => $uri->getAuthority(),
-            //'userinfo' => $uri->getUserInfo(),
             'scheme' => $uri->getScheme(),
             'user' => $user,
             'pass' => $pass,
             'host' => $uri->getHost(),
             'port' => $uri->getPort(),
             'path' => $uri->getPath(),
-            'fragment' => $uri->getFragment(),
             'query' => $uri->getQuery(),
+            'fragment' => $uri->getFragment(),
         ];
 
         return self::fromComponents($components);
