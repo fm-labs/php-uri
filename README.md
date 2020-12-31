@@ -2,12 +2,13 @@
 
 Simple URI library for PHP. Compliant to PSR-7 UriInterface specification.
 Includes RFC3968-compliant URI normalizer.
+Supports PHP 7.1+ and PHP 8.0.
 
 [![Build Status](https://travis-ci.org/fm-labs/php-uri.svg?branch=master)](https://travis-ci.org/fm-labs/php-uri)
 
 ## Requirements
 
-- php 7.1+
+- php7.1+ | php8.0
 
 ## Installation
 
@@ -158,10 +159,58 @@ and [here](http://en.wikipedia.org/wiki/URL_normalization).
 Returns a new `Uri` object with normalized components. 
 
 ```php
-$uri = \FmLabs\Uri\UriNormalizer::normalize('hTTp://www.eXample.org:80/test/./../foo/../bar');
+$uri = \FmLabs\Uri\UriFactory::fromString('hTTp://www.eXample.org:80/test/./../foo/../bar');
+$normalized = \FmLabs\Uri\UriNormalizer::normalize($uri);
 // http://www.example.org/test/foo/bar;
 ```
 
+```php
+$uri = \FmLabs\Uri\UriFactory::fromString('hTTp://www.eXample.org:80/test/./../foo/../bar');
+$normalizer = new \FmLabs\Uri\UriNormalizer($uri);
+$uri = $normalizer
+    // these normalizations preserve semantics of uri
+    ->normalizeScheme()
+    ->normalizeHost()
+    ->normalizeDotSegements()
+    ->normalizeTrailingSlash()
+    ->normalizeUnreservedChars()
+    ->normalizeEscapeSequences()
+    ->normalizeDefaultPorts()
+    // these normalizations change semantics of uri
+    ->normalizeForceHttps()
+    ->normalizeHostIp()
+    ->normalizeWwwDomain()
+    ->normalizeNonEmptyPath()
+    ->normalizeDirectoryIndex()
+    ->normalizeDuplicateSlashes()
+    ->normalizeFragment()
+    ->normalizeQuerySorting()
+    ->normalizeEmptyQuery()
+    ->getUri();
+
+$normalizedUri = \FmLabs\Uri\UriNormalizer::normalize($uri, ['preserve' => false]);
+// http://www.example.org/test/foo/bar;
+```
+
+| Method    | Normalization    | Example    | Result     |
+| ---       | ---              | ---        | ---        |
+| `normalizeEscapeSequences` | Converting percent-encoded triplets to uppercase | `http://example.com/foo%2a` | `http://example.com/foo%2A` |
+| `normalizeScheme` | Converting the scheme to lowercase | `HTTP://User@Example.COM/Foo` | `http://User@Example.COM/Foo` |
+| `normalizeHost` | Converting the host to lowercase | `HTTP://User@Example.COM/Foo` | `HTTP://User@example.com/Foo` |
+| `normalizeUnreservedChars` | Decoding percent-encoded triplets of unreserved characters | `http://example.com/%7Efoo` | `http://example.com/~foo` |
+| `normalizeDotSegments` | Removing dot-segments | `http://example.com/foo/./bar/baz/../qux` | `http://example.com/foo/bar/qux` |
+| `normalizeTrailingSlash` | Converting an empty path to a "/" path | `http://example.com` | `http://example.com/` |
+| `normalizeDefaultPorts` | Removing the default port | `http://example.com:80/` | `http://example.com/` |
+| `normalizeFragment` | Removing the fragment | `http://example.com/bar.html#section1` | `http://example.com/bar.html` |
+| `normalizeForceHttps` | Force protocol | `http://example.com/` | `https://example.com/` |
+| `normalizeDuplicateSlashes` | Removing duplicate slashes | `http://example.com/foo//bar.html` | `http://example.com/foo/bar.html`|
+| `normalizeEmptyQuery` | Removing the "?" when the query is empty | `http://example.com/display?` | `http://example.com/display` |
+| `normalizeQuerySorting` | Sorting the query parameters  | `http://example.com/display?lang=en&article=fred` | `http://example.com/display?article=fred&lang=en` |
+| @TODO `normalizeHostIp` | Replacing IP with domain name | `http://123.234.123.234/` | `http://example.com/` |
+| @TODO `normalizeWwwDomain` | Removing or adding “www” as the first domain label | `http://www.example.com/` | `http://example.com/` |
+| @TODO `normalizeNonEmptyPath` | Adding a trailing "/" to a non-empty path | `http://example.com/foo` | `http://example.com/foo/` |
+| @TODO `normalizeDirectoryIndex` | Removing directory index | - | - |
+| @TODO `normalizeQuery` | Remove (unused) query variables | - | - |
 
 ## Usage
 
@@ -176,21 +225,22 @@ $ ./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/
 
 ## TODO
 
-- UriNormalizer: normalize: Removing dot-segments
 - UriNormalizer: normalize: Removing directory index
-- UriNormalizer: normalize: Removing the fragment
 - UriNormalizer: normalize: Replacing IP with domain name
-- UriNormalizer: normalize: Limiting protocols
-- UriNormalizer: normalize: Removing duplicate slashes
 - UriNormalizer: normalize: Removing or adding “www” as the first domain label
-- UriNormalizer: normalize: Sorting the query parameters
 - UriNormalizer: normalize: Removing unused query variables
-- UriNormalizer: normalize: Removing the "?" when the query is empty
 
 ## Changelog
+[0.6]
+- Added UriFactory::create() method
+- Added UriFactory::setClassName() method
+- Added more tests
+- Refactored UriNormalizer and added fluent method interface.
+- Added more normalization methods
+
 [0.5]
 - Changed Uri class: Removed constructor
-- Changed Uri class: Implemented etter method to create new modified instances
+- Changed Uri class: Implemented better method to create new modified instances
 - Changed Uri class: Use class properties instead of property array
 - Added PHP8 annotations
 - Added TravisCI build targets php7.4 & php8.0
