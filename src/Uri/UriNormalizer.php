@@ -89,12 +89,19 @@ class UriNormalizer
     }
 
     /**
+     * Dot-segments . and .. in the path component of the URI should be removed by applying
+     * the remove_dot_segments algorithm to the path described in RFC 3986.
+     * Example: http://example.com/foo/./bar/baz/../qux → http://example.com/foo/bar/qux
+     *
      * @return $this
      */
     public function normalizeDotSegements()
     {
         $uri = &$this->uri;
-        //@TODO Implement me
+        if ($uri->getPath()) {
+            $uri = $uri->withPath(static::removeDotSegments($uri->getPath()));
+        }
+
         return $this;
     }
 
@@ -106,8 +113,8 @@ class UriNormalizer
         $uri = &$this->uri;
         if (!$uri->getPath()) {
             $uri = $uri->withPath('/');
-        } elseif (substr($uri->getPath(), -1) != '/') {
-            $uri = $uri->withPath($uri->getPath() . '/');
+        //} elseif (substr($uri->getPath(), -1) != '/') {
+        //    $uri = $uri->withPath($uri->getPath() . '/');
         }
 
         return $this;
@@ -150,6 +157,8 @@ class UriNormalizer
     }
 
     /**
+     * Removing the default port.
+     *
      * @return $this
      */
     public function normalizeDefaultPorts()
@@ -165,22 +174,31 @@ class UriNormalizer
     }
 
     /**
+     * Removing the fragment.
+     * The fragment component of a URI is never seen by the server and can sometimes be removed.
+     *
      * @return $this
      */
     public function normalizeFragment()
     {
         $uri = &$this->uri;
-        //@TODO Implement me
+        if ($uri->getFragment()) {
+            $uri = $uri->withFragment('');
+        }
+
         return $this;
     }
 
     /**
      * @return $this
      */
-    public function normalizeProtocols()
+    public function normalizeForceHttps()
     {
         $uri = &$this->uri;
-        //@TODO Implement me
+        if (strtolower($uri->getScheme()) == 'http') {
+            $uri = $uri->withScheme('https');
+        }
+
         return $this;
     }
 
@@ -210,7 +228,11 @@ class UriNormalizer
     public function normalizeDuplicateSlashes()
     {
         $uri = &$this->uri;
-        //@TODO Implement me
+        if ($uri->getPath()) {
+            $path = preg_replace('@//@', '/', $uri->getPath());
+            $uri = $uri->withPath($path);
+        }
+
         return $this;
     }
 
@@ -230,12 +252,19 @@ class UriNormalizer
     public function normalizeQuerySorting()
     {
         $uri = &$this->uri;
-        //@TODO Implement me
+        if ($uri->getQuery()) {
+            parse_str($uri->getQuery(), $queryData);
+            ksort($queryData);
+            $queryStr = http_build_query($queryData);
+            $uri = $uri->withQuery($queryStr);
+        }
+
         return $this;
     }
 
     /**
      * @return $this
+     * @deprecated. Empty queries are cleaned out by the URI class itself.
      */
     public function normalizeEmptyQuery()
     {
@@ -247,6 +276,15 @@ class UriNormalizer
     /**
      * Normalize Uri
      *
+     * Options:
+     * - `force_ssl`: Forces https scheme on http uri
+     * - `resolve_ip`: Resolve hostname for IP
+     * - `force_www`: Force www subdomain prefix
+     * - `no_frag` : Remove fragment
+     * - `no_index` : Remove common directory index paths
+     * - `query_sort` : Sort query parameters
+     * - `trail`: Add trailing slash for non-empty paths
+     *
      * @param \FmLabs\Uri\Uri|\Psr\Http\Message\UriInterface $uri URI object
      * @param array $options Normalization options
      * @return \FmLabs\Uri\Uri|\Psr\Http\Message\UriInterface
@@ -255,8 +293,7 @@ class UriNormalizer
     {
         $normalizer = new self($uri, $options);
         // preserve semantics
-        $uri = $normalizer
-            ->normalizeProtocols()
+        $normalizer
             ->normalizeScheme()
             ->normalizeHost()
             ->normalizeDefaultPorts()
@@ -264,24 +301,33 @@ class UriNormalizer
             ->normalizeEscapeSequences()
             ->normalizeUnreservedChars()
             ->normalizeTrailingSlash()
-            ->getUri();
+            ->normalizeDuplicateSlashes()
+            ->normalizeEmptyQuery();
 
         // change semantics
-        $preserve = $options['preserve'] ?? true;
-        if ($preserve === false) {
-            $uri = $normalizer
-                ->normalizeHostIp()
-                ->normalizeWwwDomain()
-                ->normalizeDirectoryIndex()
-                ->normalizeDuplicateSlashes()
-                ->normalizeNonEmptyPath()
-                ->normalizeQuerySorting()
-                ->normalizeFragment()
-                ->normalizeEmptyQuery()
-                ->getUri();
+        if ($options['force_ssl'] ?? false) {
+            $normalizer->normalizeForceHttps();
+        }
+        if ($options['resolve_ip'] ?? false) {
+            $normalizer->normalizeHostIp();
+        }
+        if ($options['force_www'] ?? false) {
+            $normalizer->normalizeWwwDomain();
+        }
+        if ($options['no_frag'] ?? false) {
+            $normalizer->normalizeFragment();
+        }
+        if ($options['no_index'] ?? false) {
+            $normalizer->normalizeDirectoryIndex();
+        }
+        if ($options['query_sort'] ?? false) {
+            $normalizer->normalizeQuerySorting();
+        }
+        if ($options['trail'] ?? false) {
+            $normalizer->normalizeNonEmptyPath();
         }
 
-        return $uri;
+        return $normalizer->getUri();
     }
 
     /**
@@ -348,7 +394,33 @@ class UriNormalizer
      */
     public static function removeDotSegments(string $path): string
     {
-        // @TODO Implement me
+        $stack = [];
+
+        $parts = explode('/', $path);
+        $partsCount = count($parts);
+        for ($i = 0; $i < $partsCount; $i++) {
+            $seg = $parts[$i];
+            if ($seg == '.') {
+                continue;
+            }
+            if ($seg == '..') {
+                array_pop($stack);
+                continue;
+            }
+            array_push($stack, $seg);
+        }
+        $path = join('/', $stack);
+
+        /*
+        do {
+            $parts = explode('/', $path);
+            $parts = array_filter($parts, function ($val) {
+                return $val == '.' || $val == '..' ? false : true;
+            });
+            $path = join('/', $parts);
+        } while (preg_match('@\./@', $path));
+        */
+
         return $path;
     }
 }
