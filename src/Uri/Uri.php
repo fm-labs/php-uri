@@ -9,6 +9,13 @@ use Psr\Http\Message\UriInterface;
 /**
  * Class Uri
  *
+ * @property string $scheme
+ * @property string $user
+ * @property string $pass
+ * @property string $host
+ * @property int $port
+ * @property string $path
+ * @property string $fragment
  * @property string $userinfo
  * @property string $hostinfo
  * @property string $authority

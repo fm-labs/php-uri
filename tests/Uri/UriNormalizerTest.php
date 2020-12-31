@@ -9,6 +9,9 @@ use Psr\Http\Message\UriInterface;
 
 class UriNormalizerTest extends TestCase
 {
+    /**
+     * @return void
+     */
     public function testGetUri(): void
     {
         $normalizer = new UriNormalizer(UriFactory::fromString('http://eXample.org'));
@@ -16,6 +19,9 @@ class UriNormalizerTest extends TestCase
         $this->assertEquals('http://eXample.org', $normalizer->getUri());
     }
 
+    /**
+     * @return void
+     */
     public function testNormalizeScheme(): void
     {
         $uri = UriFactory::fromString('HTTP://example.org/');
@@ -29,6 +35,9 @@ class UriNormalizerTest extends TestCase
         $this->assertEquals('http://example.org/', (string)$normalized);
     }
 
+    /**
+     * @return void
+     */
     public function testNormalizeHost(): void
     {
         $uri = UriFactory::fromString('http://eXamPLE.oRg/');
@@ -42,6 +51,9 @@ class UriNormalizerTest extends TestCase
         $this->assertEquals('http://example.org/', (string)$normalized);
     }
 
+    /**
+     * @return void
+     */
     public function testNormalizeDefaultPorts(): void
     {
         $uri = UriFactory::fromString('http://example.org:80/');
@@ -64,6 +76,9 @@ class UriNormalizerTest extends TestCase
         $this->assertEquals('http://example.org/', (string)$normalized);
     }
 
+    /**
+     * @return void
+     */
     public function testNormalizeTrailingSlash(): void
     {
         $uri = UriFactory::fromString('http://example.org/');
@@ -94,6 +109,9 @@ class UriNormalizerTest extends TestCase
         $this->assertEquals('http://example.org/test/?q=1#frag', (string)$normalized);
     }
 
+    /**
+     * @return void
+     */
     public function testNormalizeUnreservedChars(): void
     {
         $tests = [
@@ -116,6 +134,9 @@ class UriNormalizerTest extends TestCase
         $this->assertEquals('http://www.example.com/~username/', (string)$normalized);
     }
 
+    /**
+     * @return void
+     */
     public function testNormalizeEscapeSequences(): void
     {
         $url = 'http://www.example.com/a%c2%b1b/';
@@ -132,6 +153,9 @@ class UriNormalizerTest extends TestCase
         $this->assertEquals($expected, (string)$normalized);
     }
 
+    /**
+     * @return void
+     */
     public function testForceHttps(): void
     {
         $url = 'http://www.example.com/';
@@ -147,6 +171,9 @@ class UriNormalizerTest extends TestCase
         $this->assertEquals($expected, (string)$normalized);
     }
 
+    /**
+     * @return void
+     */
     public function testNormalizeFragment(): void
     {
         $url = 'http://example.com/bar.html#section1';
@@ -162,6 +189,9 @@ class UriNormalizerTest extends TestCase
         $this->assertEquals($expected, (string)$normalized);
     }
 
+    /**
+     * @return void
+     */
     public function testNormalizeQuerySorting(): void
     {
         $url = 'http://example.com/display?lang=en&article=fred';
@@ -177,6 +207,9 @@ class UriNormalizerTest extends TestCase
         $this->assertEquals($expected, (string)$normalized);
     }
 
+    /**
+     * @return void
+     */
     public function testNormalizeDuplicateSlashes(): void
     {
         $url = 'http://example.com/foo//bar.html';
@@ -211,6 +244,9 @@ class UriNormalizerTest extends TestCase
         $this->assertEquals($expected, (string)$normalized);
     }
 
+    /**
+     * @return void
+     */
     public function testNormalizeDotSegements(): void
     {
         $url = 'http://example.com/foo/./bar/baz/../qux';
@@ -226,26 +262,41 @@ class UriNormalizerTest extends TestCase
         $this->assertEquals($expected, (string)$normalized);
     }
 
+    /**
+     * @return void
+     */
     public function testNormalizeNonEmptyPath(): void
     {
         $this->markTestIncomplete();
     }
 
+    /**
+     * @return void
+     */
     public function testNormalizeDirectoryIndex(): void
     {
         $this->markTestIncomplete();
     }
 
+    /**
+     * @return void
+     */
     public function testNormalizeHostIp(): void
     {
         $this->markTestIncomplete();
     }
 
+    /**
+     * @return void
+     */
     public function testNormalizeWwwDomain(): void
     {
         $this->markTestIncomplete();
     }
 
+    /**
+     * @return void
+     */
     public function testStaticDecodeUnreservedChars(): void
     {
         $tests = [
@@ -268,6 +319,9 @@ class UriNormalizerTest extends TestCase
         }
     }
 
+    /**
+     * @return void
+     */
     public function testStaticCapitalizeEscapeSequences(): void
     {
         $path = '/a%c2%b1b/';
@@ -276,27 +330,41 @@ class UriNormalizerTest extends TestCase
         $this->assertEquals($expected, UriNormalizer::capitalizeEscapeSequences($path));
     }
 
+    /**
+     * @return void
+     */
     public function testStaticRemoveDotSegments(): void
     {
         $this->markTestIncomplete();
     }
 
+    /**
+     * @return void
+     */
     public function testStaticNormalize(): void
     {
         $this->markTestIncomplete();
     }
 
-
+    /**
+     * @return void
+     */
     public function testStaticWithAllNormalizations(): void
     {
         $this->markTestIncomplete('Implement all the missing normalization methods and tests');
     }
 
+    /**
+     * @return void
+     */
     public function testStaticWithPreservedSemantics(): void
     {
         $this->markTestIncomplete('Implement all the missing semantic-preserving methods and tests');
     }
 
+    /**
+     * @return void
+     */
     public function testStaticWithChangedSemantics(): void
     {
         $this->markTestIncomplete('Implement all the missing semantic-changing methods and tests');

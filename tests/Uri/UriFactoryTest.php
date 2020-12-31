@@ -9,6 +9,9 @@ use Psr\Http\Message\UriInterface;
 
 class UriFactoryTest extends \PHPUnit\Framework\TestCase
 {
+    /**
+     * @return void
+     */
     public function setUp(): void
     {
         parent::setUp();
@@ -16,12 +19,18 @@ class UriFactoryTest extends \PHPUnit\Framework\TestCase
         UriFactory::setClassName(Uri::class);
     }
 
+    /**
+     * @return void
+     */
     public function testStaticSetClassName(): void
     {
         $this->expectException(\RuntimeException::class);
         UriFactory::setClassName('\\Invalid\\Class\\Path');
     }
 
+    /**
+     * @return void
+     */
     public function testStaticCreate(): void
     {
         $uri = UriFactory::create();
@@ -33,6 +42,9 @@ class UriFactoryTest extends \PHPUnit\Framework\TestCase
         UriFactory::create();
     }
 
+    /**
+     * @return void
+     */
     public function testStaticFromString(): void
     {
         $uri = UriFactory::fromString('https://user:secret@www.example.org:1234/my/path?some=query&foo=bar#frag');
@@ -45,6 +57,9 @@ class UriFactoryTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('frag', $uri->getFragment());
     }
 
+    /**
+     * @return void
+     */
     public function testStaticFromUri(): void
     {
         $tmp = UriFactory::fromString('https://user:secret@www.example.org:1234/my/path?some=query&foo=bar#frag');
