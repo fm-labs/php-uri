@@ -7,7 +7,7 @@ php:
   - '8.0'
 
 install:
-  - travis_retry composer install --no-interaction --no-suggest
+  - travis_retry composer install --no-interaction
 
 # Testing the app
 script:
