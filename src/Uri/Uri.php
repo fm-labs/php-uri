@@ -16,6 +16,7 @@ use Psr\Http\Message\UriInterface;
  * @property int $port
  * @property string $path
  * @property string $fragment
+ * @property string $query
  * @property string $userinfo
  * @property string $hostinfo
  * @property string $authority
@@ -27,6 +28,11 @@ class Uri implements UriInterface, ArrayAccess
     protected const USERINFO = 'userinfo';
     protected const AUTHORITY = 'authority';
     protected const QUERYDATA = 'querydata';
+
+    protected const PORT_MIN = 1;
+    protected const PORT_MAX = 65535;
+
+    protected const ERR_INVALID_PORT = 'Invalid port. Valid port range 1 - 65535';
 
     protected $scheme;
     protected $user;
@@ -56,6 +62,11 @@ class Uri implements UriInterface, ArrayAccess
             default:
                 return [null, null];
         }
+    }
+
+    public function __clone()
+    {
+        //$this->queryData = [];
     }
 
     /**
@@ -103,7 +114,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getScheme()
     {
-        return $this->scheme;
+        return (string)$this->scheme;
     }
 
     /**
@@ -111,7 +122,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getHost()
     {
-        return $this->host;
+        return (string)$this->host;
     }
 
     /**
@@ -127,7 +138,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getPath()
     {
-        return $this->path;
+        return (string)$this->path;
     }
 
     /**
@@ -135,7 +146,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getQuery()
     {
-        return $this->query;
+        return (string)$this->query;
     }
 
     /**
@@ -143,7 +154,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function getFragment()
     {
-        return $this->fragment;
+        return (string)$this->fragment;
     }
 
     /**
@@ -187,7 +198,7 @@ class Uri implements UriInterface, ArrayAccess
      *
      * @return array
      */
-    public function getComponents()
+    public function getComponents(): array
     {
         return [
             'scheme' => $this->scheme,
@@ -204,17 +215,17 @@ class Uri implements UriInterface, ArrayAccess
     /**
      * @return string
      */
-    public function getUser()
+    public function getUser(): string
     {
-        return $this->user;
+        return (string)$this->user;
     }
 
     /**
      * @return string
      */
-    public function getUserPass()
+    public function getUserPass(): string
     {
-        return $this->pass;
+        return (string)$this->pass;
     }
 
     /**
@@ -223,7 +234,7 @@ class Uri implements UriInterface, ArrayAccess
      *
      * @return string
      */
-    public function getHostInfo(): ?string
+    public function getHostInfo(): string
     {
         $info = $this->getHost();
         if ($this->getPort()) {
@@ -245,7 +256,7 @@ class Uri implements UriInterface, ArrayAccess
 
         return $this->queryData[$key] ?? null;
     }
-    
+
     /**
      * @param array $components URI components
      * @return \FmLabs\Uri\Uri|\Psr\Http\Message\UriInterface
@@ -264,7 +275,7 @@ class Uri implements UriInterface, ArrayAccess
 
         return $clone;
     }
-    
+
     /**
      * Return an instance with the specified scheme.
      *
@@ -282,6 +293,8 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withScheme($scheme)
     {
+        //@TODO Check scheme
+        //@TODO Auto-normalize scheme?
         return $this->with(['scheme' => $scheme]);
     }
 
@@ -318,6 +331,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withHost($host)
     {
+        //@TODO Check hostname format
         return $this->with(['host' => $host]);
     }
 
@@ -340,6 +354,10 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withPort($port)
     {
+        if ($port !== null && (!is_int($port) || $port < static::PORT_MIN || $port > static::PORT_MAX)) {
+            throw new \InvalidArgumentException(static::ERR_INVALID_PORT);
+        }
+
         return $this->with(['port' => $port]);
     }
 
@@ -367,6 +385,8 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withPath($path)
     {
+        //@TODO Check encoding
+        //@TODO Check for invalid paths
         return $this->with(['path' => $path]);
     }
 
@@ -387,7 +407,9 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function withQuery($query)
     {
-        return $this->with(['query' => $query]);
+        //@TODO Check query string format
+        //@TODO Preserve empty query strings ("?")
+        return $this->with([/*'queryData' => [], */'query' => $query]);
     }
 
     /**
@@ -467,7 +489,7 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        throw new \RuntimeException('Unable to set Uri component. Uri object is read-only.');
+        throw new \RuntimeException('Unable to set Uri component. Uri object is immutable.');
     }
 
     /**
@@ -475,6 +497,6 @@ class Uri implements UriInterface, ArrayAccess
      */
     public function offsetUnset($offset)
     {
-        throw new \RuntimeException('Unable to unset Uri component. Uri object is read-only.');
+        throw new \RuntimeException('Unable to unset Uri component. Uri object is immutable.');
     }
 }
