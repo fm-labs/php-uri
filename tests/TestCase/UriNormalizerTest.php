@@ -1,6 +1,6 @@
 <?php
 
-namespace FmLabs\Test\Uri;
+namespace FmLabs\Uri\Test\TestCase;
 
 use FmLabs\Uri\UriFactory;
 use FmLabs\Uri\UriNormalizer;

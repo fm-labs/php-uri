@@ -18,12 +18,12 @@
     },
     "autoload": {
         "psr-4": {
-            "FmLabs\\Uri\\": "src/Uri"
+            "FmLabs\\Uri\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "FmLabs\\Test\\Uri\\": "tests/Uri"
+            "FmLabs\\Uri\\Test\\": "tests/"
         }
     },
     "scripts": {

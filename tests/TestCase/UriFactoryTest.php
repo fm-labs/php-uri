@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace FmLabs\Test\Uri;
+namespace FmLabs\Uri\Test\TestCase;
 
 use FmLabs\Uri\Uri;
 use FmLabs\Uri\UriFactory;
