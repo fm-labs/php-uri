@@ -229,8 +229,16 @@ $ ./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/
 - UriNormalizer: normalize: Replacing IP with domain name
 - UriNormalizer: normalize: Removing or adding “www” as the first domain label
 - UriNormalizer: normalize: Removing unused query variables
+- UriNormalizer: Use better semantics for normalization method names to make fluent interface more intuitive
+- UriNormalizer: Refactor normalization methods into classes
+- UriFactory: Auto-normalize Uri according to RFC  
+- Add UriFactoryTrait
 
 ## Changelog
+[0.6.1]
+- Added stricter type casting
+- Added more Uri tests
+
 [0.6]
 - Added UriFactory::create() method
 - Added UriFactory::setClassName() method
@@ -244,16 +252,16 @@ $ ./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/
 - Changed Uri class: Use class properties instead of property array
 - Added PHP8 annotations
 - Added TravisCI build targets php7.4 & php8.0
-- Added Tests support for PHPUnit9
+- Added Test support for PHPUnit9
 
 [0.4]
 - Dropped UriBuilder in favor of UriFactory
 - Added UriFactory  
 - Changed Uri constructor
-- Changed PHP language level to 7.1
+- Changed min PHP language level to 7.1
 - Changed license to MIT license
-- Added: Tests support for PHPUnit8
-- Fixed: Code style
+- Added Test support for PHPUnit8
+- Fixed Code style
 
 [0.3.1]
 - Added PSR-7 compatibility. Uri now implements PSR UriInterface
@@ -267,7 +275,7 @@ $ ./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/
 - Refactored UrlNormalizer to UriNormalizer
 - Added UriBuilder class
 - Upgraded unit tests to PHPUnit6
-- Set min PHP version to 7.0
+- Changed min PHP language level to 7.1
 
 [0.2]
 - Added UrlExpander util class (requires curl)
